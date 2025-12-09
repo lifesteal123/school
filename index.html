@@ -1,0 +1,1465 @@
+<!DOCTYPE content="text/html">
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת ניהול בית ספר</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-sizing: border-box;
+        }
+        
+        /* Neumorphism Base Background (Lighter for contrast) */
+        .body-bg {
+            background: #e6e9ee; /* בסיס בהיר יותר */
+        }
+
+        /* --- HARD NEUMORPHISM STYLES --- */
+
+        /* General Neumorphism Shadow Mixin (applies to large containers/cards) */
+        .neumorphic-card {
+            border-radius: 24px; /* פינות עגולות יותר */
+            background: #e6e9ee;
+            /* צללים מודגשים ומרוחקים */
+            box-shadow: 15px 15px 30px #a3a6ab, 
+                        -15px -15px 30px #ffffff;
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* אנימציה חלקה */
+        }
+        .neumorphic-card:hover {
+            box-shadow: 12px 12px 24px #a3a6ab, 
+                        -12px -12px 24px #ffffff;
+            transform: translateY(-3px); /* הרמה קלה בריחוף */
+        }
+
+        /* Improved Buttons Style - The main elevated effect */
+        .neumorphic-btn {
+            border-radius: 16px;
+            background: #e6e9ee;
+            /* צללים מוגדרים יותר */
+            box-shadow: 8px 8px 16px #a3a6ab, 
+                        -8px -8px 16px #ffffff;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+        }
+        
+        /* Deep press effect on active (applies to all neumorphic buttons) */
+        .neumorphic-btn:active {
+            box-shadow: inset 5px 5px 10px #a3a6ab, 
+                        inset -5px -5px 10px #ffffff;
+            transform: scale(0.96); /* לחיצה עמוקה יותר */
+        }
+        
+        /* Neumorphic Input/Select Style (the sunken effect) */
+        .neumorphic-input {
+            border-radius: 12px;
+            /* אפקט שקיעה עמוק */
+            box-shadow: inset 4px 4px 8px #a3a6ab, 
+                        inset -4px -4px 8px #ffffff;
+            border: none;
+            background: #e6e9ee;
+            transition: all 0.3s ease;
+        }
+        .neumorphic-input:focus {
+            outline: none;
+            border: 2px solid #4f46e5; /* Indigo */
+            box-shadow: inset 4px 4px 8px #a3a6ab, 
+                        inset -4px -4px 8px #ffffff;
+        }
+
+        /* Custom Scrollbar for better appearance */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: #9ca3af;
+            border-radius: 20px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background-color: #e6e9ee;
+        }
+
+        /* --- GRADIENT BUTTONS AND COLOR OVERRIDES --- */
+        
+        .btn-indigo { background: linear-gradient(145deg, #4f46e5, #3c30c3); color: white; box-shadow: 0 6px 15px rgba(79, 70, 229, 0.4); }
+        .btn-green { background: linear-gradient(145deg, #10b981, #0c9165); color: white; box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4); }
+        .btn-purple { background: linear-gradient(145deg, #8b5cf6, #6e44c3); color: white; box-shadow: 0 6px 15px rgba(139, 92, 246, 0.4); }
+        .btn-orange { background: linear-gradient(145deg, #f59e0b, #d4830a); color: white; box-shadow: 0 6px 15px rgba(245, 158, 11, 0.4); }
+        .btn-red { background: linear-gradient(145deg, #ef4444, #c93535); color: white; box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4); }
+        .btn-gray { background: #e6e9ee; color: #4b5563; }
+        .btn-gray:hover { background: #d0d5dc; }
+
+        /* WOW Hover Effect for Gradient Buttons */
+        .btn-indigo:hover { background: linear-gradient(160deg, #4f46e5, #3c30c3); box-shadow: 0 10px 20px rgba(79, 70, 229, 0.6); transform: translateY(-4px); }
+        .btn-green:hover { background: linear-gradient(160deg, #10b981, #0c9165); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.6); transform: translateY(-4px); }
+        .btn-purple:hover { background: linear-gradient(160deg, #8b5cf6, #6e44c3); box-shadow: 0 10px 20px rgba(139, 92, 246, 0.6); transform: translateY(-4px); }
+        .btn-orange:hover { background: linear-gradient(160deg, #f59e0b, #d4830a); box-shadow: 0 10px 20px rgba(245, 158, 11, 0.6); transform: translateY(-4px); }
+        .btn-red:hover { background: linear-gradient(160deg, #ef4444, #c93535); box-shadow: 0 10px 20px rgba(239, 68, 68, 0.6); transform: translateY(-4px); }
+        
+        /* Ensure gradient buttons still have the press feel (override neumorphic-btn:active shadow) */
+        .btn-indigo:active, .btn-green:active, .btn-purple:active, .btn-orange:active, .btn-red:active {
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); /* Flatter, deeper shadow on press */
+            transform: scale(0.98); 
+        }
+
+        /* --- SIDEBAR STYLE BUTTONS (FOR MAIN SCREEN) --- */
+        .sidebar-btn {
+            border-radius: 18px;
+            padding: 1.5rem; 
+            text-align: right;
+            position: relative;
+            overflow: hidden;
+            font-size: 1.5rem;
+        }
+
+        /* Card Header Border Colors for visual separation */
+        .border-t-indigo-500 { border-top: 6px solid #4f46e5; }
+        .border-t-green-500 { border-top: 6px solid #10b981; }
+        .border-t-yellow-500 { border-top: 6px solid #f59e0b; }
+        .border-t-blue-500 { border-top: 6px solid #3b82f6; }
+        .border-t-purple-500 { border-top: 6px solid #8b5cf6; }
+        .border-t-orange-500 { border-top: 6px solid #f59e0b; }
+        .border-t-red-500 { border-top: 6px solid #ef4444; } /* Added for ceremonies */
+
+    </style>
+</head>
+<body class="body-bg min-h-screen">
+    <div id="app"></div>
+
+    <div id="publishModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0" onclick="closePublishModal()">
+        <div class="neumorphic-card p-8 max-w-md w-full relative" onclick="event.stopPropagation()">
+            <button onclick="closePublishModal()" class="absolute top-4 left-4 btn-red text-white rounded-full h-8 w-8 flex items-center justify-center text-xl font-bold transition neumorphic-btn shadow-lg">
+                &times;
+            </button>
+            <h3 class="text-2xl font-bold text-center mb-6 text-indigo-700 border-b-2 border-indigo-200 pb-2">אישור פרסום</h3>
+            <p class="text-center text-gray-700 mb-4">הזן קוד מורה כדי לפרסם פעילות:</p>
+            <input type="password" id="publishCodeInput" placeholder="קוד מורה" 
+                class="w-full px-4 py-3 rounded-xl mb-6 text-center text-lg transition neumorphic-input">
+            <p id="publishCodeError" class="text-red-500 text-center mb-4 hidden">קוד שגוי</p>
+            <div class="flex gap-4">
+                <button onclick="verifyAndShowPublishForm()" class="flex-1 btn-indigo neumorphic-btn font-semibold py-3 shadow-lg">
+                    אישור
+                </button>
+                <button onclick="closePublishModal()" class="flex-1 btn-gray neumorphic-btn font-semibold py-3 shadow-md">
+                    ביטול
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0" onclick="closeDeleteModal()">
+        <div class="neumorphic-card p-8 max-w-md w-full relative" onclick="event.stopPropagation()">
+            <button onclick="closeDeleteModal()" class="absolute top-4 left-4 btn-red text-white rounded-full h-8 w-8 flex items-center justify-center text-xl font-bold transition neumorphic-btn shadow-lg">
+                &times;
+            </button>
+            <h3 class="text-2xl font-bold text-center mb-6 text-red-700 border-b-2 border-red-200 pb-2">אישור מחיקה</h3>
+            <p class="text-center text-gray-700 mb-4">הזן קוד מורה כדי לאשר מחיקת פעילות:</p>
+            <input type="password" id="deleteCodeInput" placeholder="קוד מורה" 
+                class="w-full px-4 py-3 rounded-xl mb-6 text-center text-lg transition neumorphic-input focus:border-red-500">
+            <p id="deleteCodeError" class="text-red-500 text-center mb-4 hidden">קוד שגוי</p>
+            <div class="flex gap-4">
+                <button onclick="verifyAndDeleteActivity()" class="flex-1 btn-red text-white font-semibold py-3 shadow-lg neumorphic-btn">
+                    אישור מחיקה
+                </button>
+                <button onclick="closeDeleteModal()" class="flex-1 btn-gray neumorphic-btn font-semibold py-3 shadow-md">
+                    ביטול
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ceremoniesCodeModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0" onclick="closeCeremoniesCodeModal()">
+        <div class="neumorphic-card p-8 max-w-md w-full relative" onclick="event.stopPropagation()">
+            <button onclick="closeCeremoniesCodeModal()" class="absolute top-4 left-4 btn-red text-white rounded-full h-8 w-8 flex items-center justify-center text-xl font-bold transition neumorphic-btn shadow-lg">
+                &times;
+            </button>
+            <h3 class="text-2xl font-bold text-center mb-6 text-red-700 border-b-2 border-red-200 pb-2">אישור פרסום אירוע</h3>
+            <p class="text-center text-gray-700 mb-4">הזן קוד פרסום כדי להעלות תוכן:</p>
+            <input type="password" id="ceremoniesCodeInput" placeholder="הכנס קוד מנהלת" 
+                class="w-full px-4 py-3 rounded-xl mb-6 text-center text-lg transition neumorphic-input focus:border-red-500">
+            <p id="ceremoniesCodeError" class="text-red-500 text-center mb-4 hidden">קוד שגוי</p>
+            <div class="flex gap-4">
+                <button onclick="verifyAndShowCeremonyPublishForm()" class="flex-1 btn-red neumorphic-btn font-semibold py-3 shadow-lg">
+                    אישור פרסום
+                </button>
+                <button onclick="closeCeremoniesCodeModal()" class="flex-1 btn-gray neumorphic-btn font-semibold py-3 shadow-md">
+                    ביטול
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="adminCodeModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0" onclick="closeAdminCodeModal()">
+        <div class="neumorphic-card p-8 max-w-md w-full relative" onclick="event.stopPropagation()">
+            <button onclick="closeAdminCodeModal()" class="absolute top-4 left-4 btn-red text-white rounded-full h-8 w-8 flex items-center justify-center text-xl font-bold transition neumorphic-btn shadow-lg">
+                &times;
+            </button>
+            <h3 class="text-2xl font-bold text-center mb-6 text-purple-700 border-b-2 border-purple-200 pb-2">כניסת מנהל מערכת</h3>
+            <p class="text-center text-gray-700 mb-4">הזן קוד מנהל כדי להיכנס:</p>
+            <input type="password" id="adminCodeInput" placeholder="קוד מנהל" 
+                class="w-full px-4 py-3 rounded-xl mb-6 text-center text-lg transition neumorphic-input focus:border-purple-500">
+            <p id="adminCodeError" class="text-red-500 text-center mb-4 hidden">קוד שגוי</p>
+            <div class="flex gap-4">
+                <button onclick="verifyAndEnterAdminDashboard()" class="flex-1 btn-purple neumorphic-btn font-semibold py-3 shadow-lg">
+                    כניסה
+                </button>
+                <button onclick="closeAdminCodeModal()" class="flex-1 btn-gray neumorphic-btn font-semibold py-3 shadow-md">
+                    ביטול
+                </button>
+            </div>
+        </div>
+    </div>
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0" onclick="closeModal()">
+        <div class="max-w-4xl max-h-[90vh] p-4 neumorphic-card relative" onclick="event.stopPropagation()">
+            <button onclick="closeModal()" class="absolute -top-3 -left-3 btn-red text-white rounded-full h-8 w-8 flex items-center justify-center text-xl font-bold transition neumorphic-btn shadow-md">
+                &times;
+            </button>
+            <img id="modalImage" src="" alt="מערכת שעות מוגדלת" class="max-w-full max-h-[85vh] object-contain rounded-xl">
+        </div>
+    </div>
+
+
+    <script>
+        // Global state
+        let state = {
+            userType: null,
+            teacherCode: '',
+            selectedClass: null,
+            studentName: '',
+            classData: {},
+            showReminderInput: false,
+            newReminder: '',
+            showStudentInput: false,
+            // ... other state properties
+            newStudent: { number: '', name: '', gender: '' },
+            activities: [], 
+            showActivityPublishForm: false, 
+            publishingMode: 'file',
+            activityToDeleteIndex: null,
+            ceremonies: [] 
+        };
+
+        // CHANGED: Let the classes array be mutable (can be changed by Admin)
+        let classes = ['א1', 'ב1', 'ב2', 'ג1', 'ג2', 'ג3', 'ד1', 'ד2', 'ד3', 'ד4', 'ה1', 'ה2', 'ה3', 'ה4', 'ו1', 'ו2', 'ו3'];
+
+        // --- NEW: Save/Load State Functions ---
+        const STORAGE_KEY = 'schoolManagementState';
+        const CLASSES_KEY = 'schoolClassesList';
+
+        function saveState() {
+            try {
+                // Save the main state object
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+                // Save the mutable classes list separately
+                localStorage.setItem(CLASSES_KEY, JSON.stringify(classes));
+                console.log('State saved to localStorage.');
+            } catch (error) {
+                console.error("Error saving state to localStorage:", error);
+            }
+        }
+
+        function loadState() {
+            try {
+                const savedState = localStorage.getItem(STORAGE_KEY);
+                const savedClasses = localStorage.getItem(CLASSES_KEY);
+
+                if (savedState) {
+                    const loadedState = JSON.parse(savedState);
+                    // Merge loaded state with default state, ensuring all properties exist
+                    state = { ...state, ...loadedState };
+                    console.log('State loaded from localStorage.');
+                }
+                
+                if (savedClasses) {
+                    const loadedClasses = JSON.parse(savedClasses);
+                    if (Array.isArray(loadedClasses) && loadedClasses.length > 0) {
+                        classes = loadedClasses;
+                    }
+                    console.log('Classes loaded from localStorage.');
+                }
+
+            } catch (error) {
+                console.error("Error loading state from localStorage:", error);
+            }
+        }
+        // --- END: Save/Load State Functions ---
+
+
+        function getCurrentClassData() {
+            return state.classData[state.selectedClass] || {
+                scheduleImage: null,
+                reminders: [],
+                files: [],
+                students: []
+            };
+        }
+
+        function updateClassData(field, value) {
+            if (!state.classData[state.selectedClass]) {
+                state.classData[state.selectedClass] = {
+                    scheduleImage: null,
+                    reminders: [],
+                    files: [],
+                    students: []
+                };
+            }
+            state.classData[state.selectedClass][field] = value;
+            render();
+        }
+
+        function openImageModal(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            document.getElementById('modalImage').src = imageSrc;
+            modal.classList.remove('hidden', 'opacity-0');
+            modal.classList.add('flex', 'opacity-100');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('flex', 'opacity-100');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function renderPublishForm() {
+            return `
+                <div class="neumorphic-card p-5 shadow-inner w-full border-2 border-orange-300 bg-gray-50">
+                    <h4 class="text-xl font-bold text-orange-700 mb-4 border-b pb-2">פרסום פעילות חדשה:</h4>
+                    
+                    <div class="flex mb-4 gap-2">
+                        <button onclick="setPublishingMode('file')" class="flex-1 py-2 rounded-xl font-semibold transition ${state.publishingMode === 'file' ? 'bg-orange-600 text-white shadow-lg' : 'btn-gray text-gray-700 border border-gray-300 neumorphic-btn shadow-none'}">
+                            קובץ / מצגת
+                        </button>
+                        <button onclick="setPublishingMode('link')" class="flex-1 py-2 rounded-xl font-semibold transition ${state.publishingMode === 'link' ? 'bg-orange-600 text-white shadow-lg' : 'btn-gray text-gray-700 border border-gray-300 neumorphic-btn shadow-none'}">
+                            קישור לאתר
+                        </button>
+                    </div>
+
+                    ${state.publishingMode === 'file' ? `
+                        <label class="block mb-3">
+                            <span class="text-gray-700 block mb-1">העלאת קובץ:</span>
+                            <input type="file" id="activityFileInput" 
+                                class="w-full p-2 rounded-xl bg-white neumorphic-input">
+                        </label>
+                    ` : `
+                        <label class="block mb-3">
+                            <span class="text-gray-700 block mb-1">הכנס קישור (URL):</span>
+                            <input type="url" id="activityLinkInput" placeholder="https://"
+                                class="w-full px-4 py-2 rounded-xl transition neumorphic-input focus:border-orange-500">
+                        </label>
+                    `}
+
+                    <label class="block mb-4">
+                        <span class="text-gray-700 block mb-1">הוסף תיאור / מלל:</span>
+                        <textarea id="activityDescriptionInput" placeholder="נושא הפעילות, הוראות..."
+                            class="w-full px-4 py-2 rounded-xl h-20 resize-none neumorphic-input focus:border-orange-500"></textarea>
+                    </label>
+
+                    <div class="flex gap-2">
+                        <button onclick="publishActivity()" class="flex-1 btn-indigo neumorphic-btn font-semibold py-3 shadow-lg transition">
+                            פרסם פעילות
+                        </button>
+                        <button onclick="cancelPublishForm()" class="flex-1 btn-gray neumorphic-btn font-semibold py-3 shadow-md transition">
+                            ביטול
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // --- NEW: Admin Functions (Code: IMADMIN) ---
+
+        function showAdminCodeModal() {
+            const modal = document.getElementById('adminCodeModal');
+            document.getElementById('adminCodeInput').value = '';
+            document.getElementById('adminCodeError').classList.add('hidden');
+            modal.classList.remove('hidden', 'opacity-0');
+            modal.classList.add('flex', 'opacity-100');
+        }
+
+        function closeAdminCodeModal() {
+            const modal = document.getElementById('adminCodeModal');
+            modal.classList.remove('flex', 'opacity-100');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function verifyAndEnterAdminDashboard() {
+            const code = document.getElementById('adminCodeInput').value;
+            const requiredCode = 'IMADMIN'; // CODE: IMADMIN
+            if (code.toUpperCase() === requiredCode) {
+                closeAdminCodeModal();
+                state.userType = 'admin-dashboard';
+                render();
+            } else {
+                document.getElementById('adminCodeError').classList.remove('hidden');
+            }
+        }
+
+        function selectClassAdmin(className) {
+            state.selectedClass = className;
+            state.userType = 'admin-class-view'; // New state for admin viewing a specific class
+            if (!state.classData[className]) {
+                state.classData[className] = {
+                    scheduleImage: null,
+                    reminders: [],
+                    files: [],
+                    students: []
+                };
+            }
+            render();
+        }
+
+        function backToAdminDashboard() {
+            state.userType = 'admin-dashboard';
+            state.selectedClass = null; // Clear selected class
+            state.studentName = '';
+            state.showActivityPublishForm = false; 
+            state.activityToDeleteIndex = null; 
+            state.publishingMode = 'file'; 
+            render();
+        }
+
+        function addNewClass() {
+            const className = document.getElementById('newClassInput').value.trim().toUpperCase();
+            if (className && !classes.includes(className)) {
+                classes.push(className);
+                classes.sort(); // Keep the list sorted for better UX
+                // Reset the input
+                document.getElementById('newClassInput').value = ''; 
+                // Save state here
+                saveState(); 
+                render();
+            } else if (classes.includes(className)) {
+                alert(`הכיתה ${className} כבר קיימת!`);
+            } else {
+                alert('יש להזין שם כיתה.');
+            }
+        }
+
+        function deleteClass(className) {
+            if (confirm(`האם אתה בטוח שברצונך למחוק את כיתה ${className}? פעולה זו אינה הפיכה.`)) {
+                classes = classes.filter(c => c !== className);
+                // Also remove its data from state.classData (important for cleanup)
+                if (state.classData[className]) {
+                    delete state.classData[className];
+                }
+                // Save state here
+                saveState();
+                render();
+            }
+        }
+        
+        // --- End Admin Functions ---
+
+
+        // --- Ceremonies Publishing Functions (Code: INBAL) ---
+
+        function showCeremoniesCodeModal() {
+            // This is the code check needed ONLY for publishing
+            const modal = document.getElementById('ceremoniesCodeModal');
+            document.getElementById('ceremoniesCodeInput').value = '';
+            document.getElementById('ceremoniesCodeError').classList.add('hidden');
+            modal.classList.remove('hidden', 'opacity-0');
+            modal.classList.add('flex', 'opacity-100');
+        }
+
+        function closeCeremoniesCodeModal() {
+            const modal = document.getElementById('ceremoniesCodeModal');
+            modal.classList.remove('flex', 'opacity-100');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function verifyAndShowCeremonyPublishForm() {
+            const code = document.getElementById('ceremoniesCodeInput').value;
+            // The required code is 'INBAL' (case insensitive)
+            if (code.toUpperCase() === 'INBAL') {
+                closeCeremoniesCodeModal();
+                state.showActivityPublishForm = true; // Use the same flag to show the form
+                state.publishingMode = 'file'; // Default mode
+                render();
+            } else {
+                document.getElementById('ceremoniesCodeError').classList.remove('hidden');
+            }
+        }
+
+        function renderCeremonyPublishForm() {
+            // Reuses the activity publishing form structure
+            return `
+                <div class="neumorphic-card p-5 shadow-inner w-full border-2 border-red-300 bg-gray-50">
+                    <h4 class="text-xl font-bold text-red-700 mb-4 border-b pb-2">פרסום אירוע / טקס חדש:</h4>
+                    
+                    <div class="flex mb-4 gap-2">
+                        <button onclick="setCermonyPublishingMode('file')" class="flex-1 py-2 rounded-xl font-semibold transition ${state.publishingMode === 'file' ? 'bg-red-600 text-white shadow-lg' : 'btn-gray text-gray-700 border border-gray-300 neumorphic-btn shadow-none'}">
+                            קובץ / מצגת
+                        </button>
+                        <button onclick="setCermonyPublishingMode('link')" class="flex-1 py-2 rounded-xl font-semibold transition ${state.publishingMode === 'link' ? 'bg-red-600 text-white shadow-lg' : 'btn-gray text-gray-700 border border-gray-300 neumorphic-btn shadow-none'}">
+                            קישור לאתר
+                        </button>
+                    </div>
+
+                    ${state.publishingMode === 'file' ? `
+                        <label class="block mb-3">
+                            <span class="text-gray-700 block mb-1">העלאת קובץ:</span>
+                            <input type="file" id="ceremonyFileInput" 
+                                class="w-full p-2 rounded-xl bg-white neumorphic-input">
+                        </label>
+                    ` : `
+                        <label class="block mb-3">
+                            <span class="text-gray-700 block mb-1">הכנס קישור (URL):</span>
+                            <input type="url" id="ceremonyLinkInput" placeholder="https://"
+                                class="w-full px-4 py-2 rounded-xl transition neumorphic-input focus:border-red-500">
+                        </label>
+                    `}
+
+                    <label class="block mb-4">
+                        <span class="text-gray-700 block mb-1">הוסף תיאור / מלל:</span>
+                        <textarea id="ceremonyDescriptionInput" placeholder="נושא האירוע, תאריך..."
+                            class="w-full px-4 py-2 rounded-xl h-20 resize-none neumorphic-input focus:border-red-500"></textarea>
+                    </label>
+
+                    <div class="flex gap-2">
+                        <button onclick="publishCeremony()" class="flex-1 btn-red neumorphic-btn font-semibold py-3 shadow-lg transition">
+                            פרסם אירוע
+                        </button>
+                        <button onclick="cancelCeremonyPublishForm()" class="flex-1 btn-gray neumorphic-btn font-semibold py-3 shadow-md transition">
+                            ביטול
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setCermonyPublishingMode(mode) {
+            state.publishingMode = mode;
+            state.showActivityPublishForm = true; 
+            render();
+        }
+
+        function cancelCeremonyPublishForm() {
+            state.showActivityPublishForm = false;
+            render();
+        }
+
+        function publishCeremony() {
+            const description = document.getElementById('ceremonyDescriptionInput').value.trim();
+            const date = new Date().toLocaleDateString('he-IL');
+            
+            if (!description) {
+                alert('יש להזין תיאור או מלל לאירוע.');
+                return;
+            }
+
+            if (state.publishingMode === 'link') {
+                const url = document.getElementById('ceremonyLinkInput');
+                if (!url || !url.value.trim().startsWith('http')) {
+                    alert('יש להזין קישור תקין (כולל http:// או https://).');
+                    return;
+                }
+                state.ceremonies.push({
+                    type: 'link',
+                    url: url.value.trim(),
+                    description: description,
+                    date: date
+                });
+                state.showActivityPublishForm = false;
+                // Save state here
+                saveState();
+                render();
+
+            } else if (state.publishingMode === 'file') {
+                const fileInput = document.getElementById('ceremonyFileInput');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    alert('יש לבחור קובץ להעלאה.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    state.ceremonies.push({
+                        type: 'file',
+                        url: e.target.result, 
+                        name: file.name,
+                        description: description,
+                        date: date
+                    });
+                    state.showActivityPublishForm = false;
+                    // Save state here
+                    saveState();
+                    render();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function deleteCeremony(index) {
+            // For now, allow deletion without code since only users who passed the code check can publish
+            state.ceremonies.splice(index, 1);
+            // Save state here
+            saveState();
+            render();
+        }
+        
+        // --- End Ceremonies Publishing Functions ---
+
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            // --- Home Screen (Added Admin Button) ---
+            if (!state.userType) {
+                app.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center p-4">
+                        <div class="neumorphic-card p-12 max-w-lg w-full">
+                            <h1 class="text-4xl font-extrabold text-center mb-10 text-indigo-800 border-b-4 border-indigo-300 pb-3">מערכת ניהול בית הספר</h1>
+                            <div class="space-y-6">
+                                <button onclick="selectUserType('teacher')" class="w-full btn-indigo neumorphic-btn sidebar-btn font-bold py-5 text-xl">
+                                    <span class="float-right">👨‍🏫 כניסת מורה</span>
+                                </button>
+                                <button onclick="selectUserType('student')" class="w-full btn-green neumorphic-btn sidebar-btn font-bold py-5 text-xl">
+                                    <span class="float-right">👨‍🎓 כניסת תלמיד</span>
+                                </button>
+                                <button onclick="selectUserType('ceremonies-view')" class="w-full btn-purple neumorphic-btn sidebar-btn font-bold py-5 text-xl">
+                                    <span class="float-right">🌟 אירועים וטקסים (ארכיון בית ספרי)</span>
+                                </button>
+                                <button onclick="selectUserType('activities')" class="w-full btn-orange neumorphic-btn sidebar-btn font-bold py-5 text-xl">
+                                    <span class="float-right">🎯 אזור פעילויות</span>
+                                </button>
+                                <button onclick="showAdminCodeModal()" class="w-full btn-purple neumorphic-btn sidebar-btn font-bold py-5 text-xl">
+                                    <span class="float-right">⚙️ כניסת מנהל (ADMIN)</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                // saveState() is not called here since this is just navigation and not data change
+                return;
+            }
+
+            // --- Admin Dashboard (NEW: Management + Class Access) ---
+            if (state.userType === 'admin-dashboard') {
+                app.innerHTML = `
+                    <div class="min-h-screen p-8">
+                        <div class="max-w-7xl mx-auto">
+                            <div class="neumorphic-card p-6 mb-8 border-b-6 border-purple-500">
+                                <div class="flex justify-between items-center flex-wrap">
+                                    <h2 class="text-3xl font-bold text-purple-700">⚙️ דאשבורד ניהול ראשי (IMADMIN)</h2>
+                                    <button onclick="goHome()" class="btn-red neumorphic-btn px-6 py-3 font-semibold mt-3 md:mt-0 shadow-lg">
+                                        🏠 חזור לדף הבית
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                
+                                <div class="neumorphic-card p-6 border-t-green-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-green-700">➕ הוספת כיתה חדשה</h3>
+                                    <div class="space-y-4 p-4 border border-gray-300 rounded-xl bg-gray-50 neumorphic-card shadow-inner">
+                                        <input type="text" id="newClassInput" placeholder="הכנס שם כיתה (למשל: י1)" 
+                                            class="w-full px-4 py-3 rounded-xl transition neumorphic-input"
+                                            onkeypress="if(event.key==='Enter') addNewClass()">
+                                        <button onclick="addNewClass()" class="btn-green neumorphic-btn text-white px-4 py-3 rounded-xl w-full transition shadow-lg font-semibold">
+                                            הוסף כיתה
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="neumorphic-card p-6 border-t-red-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-red-700">❌ מחיקה וניהול כיתות קיימות</h3>
+                                    <div class="space-y-3 max-h-80 overflow-y-auto custom-scroll p-1 -m-1">
+                                        ${classes.length > 0 ? 
+                                            classes.map(c => `
+                                                <div class="bg-red-100 p-3 rounded-xl flex justify-between items-center border-r-6 border-red-500 shadow-md">
+                                                    <span class="font-semibold text-red-800 text-lg">כיתה ${c}</span>
+                                                    <button onclick="deleteClass('${c}')" class="btn-gray text-red-600 p-1.5 transition neumorphic-btn shadow-sm rounded-full">
+                                                        מחק 🗑️
+                                                    </button>
+                                                </div>
+                                            `).join('') :
+                                            `<div class="neumorphic-input p-5 text-center text-gray-500">אין כיתות במערכת.</div>`
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="neumorphic-card p-6 mt-8 border-t-indigo-500">
+                                <h3 class="text-2xl font-bold mb-6 text-indigo-700">כניסה לכיתה במצב מורה</h3>
+                                <p class="text-gray-700 mb-4">בחר כיתה שברצונך לנהל (כמו מורה):</p>
+                                <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-4">
+                                    ${classes.map(c => `
+                                        <button onclick="selectClassAdmin('${c}')" class="btn-indigo neumorphic-btn text-white font-bold text-lg py-4 shadow-lg">
+                                            ${c}
+                                        </button>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            // --- End Admin Dashboard ---
+
+            // --- Activity Dashboard (Remains unchanged) ---
+            if (state.userType === 'activities') {
+                app.innerHTML = `
+                    <div class="min-h-screen p-8">
+                        <div class="max-w-7xl mx-auto">
+                            <div class="neumorphic-card p-6 mb-8 border-b-6 border-orange-500">
+                                <div class="flex justify-between items-center flex-wrap">
+                                    <h2 class="text-3xl font-bold text-orange-700">🎯 אזור פעילויות לכלל הכיתות</h2>
+                                    <button onclick="goHome()" class="btn-red neumorphic-btn px-6 py-3 font-semibold mt-3 md:mt-0 shadow-lg">
+                                        🏠 חזור לדף הבית
+                                    </button>
+                                </div>
+                                <div class="mt-6 flex justify-end">
+                                    ${!state.showActivityPublishForm ? `
+                                        <button onclick="showPublishModal()" class="btn-green neumorphic-btn px-6 py-3 font-semibold shadow-lg">
+                                            ➕ פרסם פעילות חדשה (דורש קוד מורה)
+                                        </button>
+                                    ` : renderPublishForm()}
+                                </div>
+                            </div>
+                            
+                            <h3 class="text-2xl font-bold text-gray-700 mb-6">📖 פעילויות שפורסמו:</h3>
+                            <div class="space-y-4">
+                                ${state.activities.length > 0 ? 
+                                    state.activities.map((activity, index) => `
+                                        <div class="neumorphic-card p-5 border-l-6 border-orange-400 flex justify-between items-start hover:shadow-2xl">
+                                            <div class="flex-1">
+                                                <p class="text-lg font-semibold text-gray-800 mb-1">${activity.description}</p>
+                                                ${activity.type === 'link' ? `
+                                                    <a href="${activity.url}" target="_blank" class="text-blue-600 hover:text-blue-800 underline font-medium break-all">
+                                                        🔗 קישור לפעילות
+                                                    </a>
+                                                ` : `
+                                                    <a href="${activity.url}" download="${activity.name}" class="text-blue-600 hover:text-blue-800 underline font-medium">
+                                                        📄 הורד קובץ: ${activity.name}
+                                                    </a>
+                                                `}
+                                                <p class="text-sm text-gray-500 mt-2">פורסם בתאריך: ${activity.date}</p>
+                                            </div>
+                                            <button onclick="deleteActivity(${index})" class="btn-gray text-red-600 p-2 rounded-full transition neumorphic-btn shadow-md mr-4" title="מחק פעילות">
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    `).join('') 
+                                    : `
+                                    <div class="neumorphic-card p-10 text-center text-gray-500">
+                                        <p class="text-xl">אין כרגע פעילויות שפורסמו.</p>
+                                        <p>הקש על "פרסם פעילות חדשה" כדי להוסיף תוכן.</p>
+                                    </div>
+                                    `
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // --- UPDATED: Ceremonies View ---
+            if (state.userType === 'ceremonies-view') {
+                app.innerHTML = `
+                    <div class="min-h-screen p-8">
+                        <div class="max-w-7xl mx-auto">
+                            <div class="neumorphic-card p-6 mb-8 border-b-6 border-red-500">
+                                <div class="flex justify-between items-center flex-wrap">
+                                    <h2 class="text-3xl font-bold text-red-700">🌟 אירועים וטקסים (ארכיון בית ספרי)</h2>
+                                    <button onclick="goHome()" class="btn-indigo neumorphic-btn px-6 py-3 font-semibold mt-3 md:mt-0 shadow-lg">
+                                        🏠 חזור לדף הבית
+                                    </button>
+                                </div>
+                                <div class="mt-6 flex justify-end">
+                                    ${!state.showActivityPublishForm ? `
+                                        <button onclick="showCeremoniesCodeModal()" class="btn-red neumorphic-btn px-6 py-3 font-semibold shadow-lg">
+                                           פרסם אירוע חדש
+                                        </button>
+                                    ` : renderCeremonyPublishForm()}
+                                </div>
+                            </div>
+                            
+                            <h3 class="text-2xl font-bold text-gray-700 mb-6">📸 ארכיון אירועים וטקסים ("דברים מפורסמים"):</h3>
+                            <div class="space-y-4">
+                                ${state.ceremonies.length > 0 ? 
+                                    state.ceremonies.map((ceremony, index) => `
+                                        <div class="neumorphic-card p-5 border-l-6 border-red-400 flex justify-between items-start hover:shadow-2xl">
+                                            <div class="flex-1">
+                                                <p class="text-lg font-semibold text-gray-800 mb-1">${ceremony.description}</p>
+                                                ${ceremony.type === 'link' ? `
+                                                    <a href="${ceremony.url}" target="_blank" class="text-purple-600 hover:text-purple-800 underline font-medium break-all">
+                                                        🔗 קישור לאירוע / טקס
+                                                    </a>
+                                                ` : `
+                                                    <a href="${ceremony.url}" download="${ceremony.name}" class="text-purple-600 hover:text-purple-800 underline font-medium">
+                                                        📄 הורד קובץ: ${ceremony.name}
+                                                    </a>
+                                                `}
+                                                <p class="text-sm text-gray-500 mt-2">פורסם בתאריך: ${ceremony.date}</p>
+                                            </div>
+                                            <button onclick="deleteCeremony(${index})" class="btn-gray text-red-600 p-2 rounded-full transition neumorphic-btn shadow-md mr-4" title="מחק אירוע">
+                                                🗑️
+                                            </button>
+                                        </div>
+                                    `).join('') 
+                                    : `
+                                    <div class="neumorphic-card p-10 text-center text-gray-500">
+                                        <p class="text-xl">אין כרגע אירועים או טקסים שפורסמו.</p>
+                                        <p>הקש על "פרסם אירוע חדש" כדי להוסיף תוכן.</p>
+                                    </div>
+                                    `
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+
+            // --- Teacher Code Entry (Remains unchanged) ---
+            if (state.userType === 'teacher') {
+                app.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center p-4">
+                        <div class="neumorphic-card p-10 max-w-md w-full border-t-indigo-500">
+                            <h2 class="text-3xl font-bold text-center mb-8 text-indigo-700">כניסת מורה</h2>
+                            <input type="password" id="teacherCodeInput" placeholder="הזן קוד מורה" 
+                                class="w-full px-4 py-4 rounded-xl mb-6 text-center text-xl transition neumorphic-input">
+                            <p id="codeError" class="text-red-500 text-center mb-4 hidden">קוד שגוי</p>
+                            <div class="flex gap-4">
+                                <button onclick="handleTeacherLogin()" class="flex-1 btn-indigo neumorphic-btn font-semibold py-4 shadow-lg">
+                                    כניסה
+                                </button>
+                                <button onclick="goHome()" class="flex-1 btn-gray neumorphic-btn font-semibold py-4 shadow-md">
+                                    חזור
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // --- Class Selection (Student & Teacher) (Uses updated 'classes' array) ---
+            if (state.userType === 'student' || state.userType === 'teacher-select-class') {
+                const isTeacher = state.userType.startsWith('teacher');
+                const color = isTeacher ? 'indigo' : 'green';
+                const buttonAction = isTeacher ? 'selectClassTeacher' : 'selectClassStudent';
+                const colorClass = isTeacher ? 'border-t-indigo-500' : 'border-t-green-500';
+
+                app.innerHTML = `
+                    <div class="min-h-screen p-8 flex justify-center items-center">
+                        <div class="max-w-5xl w-full neumorphic-card p-12 ${colorClass}">
+                            <h2 class="text-3xl font-bold text-center mb-10 text-${color}-700">בחר כיתה</h2>
+                            <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-6">
+                                ${classes.map(c => `
+                                    <button onclick="${buttonAction}('${c}')" class="btn-${color} neumorphic-btn text-white font-bold text-lg py-6 shadow-lg">
+                                        ${c}
+                                    </button>
+                                `).join('')}
+                            </div>
+                            <button onclick="goHome()" class="mt-10 w-full btn-gray neumorphic-btn font-semibold py-4 shadow-md">
+                                חזור לדף הבית
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // --- Student Name Entry (Remains unchanged) ---
+            if (state.userType === 'student-name-entry') {
+                app.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center p-4">
+                        <div class="neumorphic-card p-10 max-w-md w-full border-t-green-500">
+                            <h2 class="text-3xl font-bold text-center mb-4 text-green-700">כיתה ${state.selectedClass}</h2>
+                            <p class="text-center text-gray-700 mb-6 text-lg">הזן את שמך (פרטי)</p>
+                            <input type="text" id="studentNameInput" placeholder="שם (פרטי)" 
+                                class="w-full px-4 py-3 rounded-xl mb-6 text-center text-lg transition neumorphic-input">
+                            <p id="studentError" class="text-red-500 text-center mb-4 hidden">שם לא נמצא ברשימה השמית</p>
+                            <div class="flex gap-4">
+                                <button onclick="handleStudentLogin()" class="flex-1 btn-green neumorphic-btn font-semibold py-4 shadow-lg">
+                                    כניסה
+                                </button>
+                                <button onclick="goHome()" class="flex-1 btn-gray neumorphic-btn font-semibold py-4 shadow-md">
+                                    חזור לדף הבית 🏠
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // --- Student Dashboard (Remains unchanged) ---
+            if (state.userType === 'student-dashboard' && state.selectedClass) {
+                const currentData = getCurrentClassData();
+                app.innerHTML = `
+                    <div class="min-h-screen p-8">
+                        <div class="max-w-7xl mx-auto">
+                            <div class="neumorphic-card p-6 mb-8 border-b-6 border-green-500">
+                                <div class="flex justify-between items-center flex-wrap">
+                                    <div>
+                                        <h2 class="text-3xl font-bold text-green-700">ברוך הבא לכיתה ${state.selectedClass}</h2>
+                                        <p class="text-lg text-gray-700 mt-1">שלום, ${state.studentName}</p>
+                                    </div>
+                                    <button onclick="goHome()" class="btn-red neumorphic-btn px-6 py-3 font-semibold mt-3 md:mt-0 shadow-lg">
+                                        🏠 חזור לדף הבית
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                <div class="neumorphic-card p-6 hover:shadow-2xl transition duration-300 border-t-green-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-green-700 flex items-center">📅 מערכת שעות</h3>
+                                    ${currentData.scheduleImage ? 
+                                        `<img src="${currentData.scheduleImage}" alt="מערכת שעות" class="w-full rounded-xl border-2 border-gray-300 cursor-pointer hover:border-green-500 transition shadow-inner" onclick="openImageModal('${currentData.scheduleImage}')">` :
+                                        `<div class="text-gray-500 text-center py-10 rounded-xl neumorphic-input"><p>המורה עדיין לא העלה מערכת שעות</p></div>`
+                                    }
+                                </div>
+                                
+                                <div class="neumorphic-card p-6 hover:shadow-2xl transition duration-300 border-t-orange-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-orange-700 flex items-center">📝 תזכורות חשובות</h3>
+                                    <div class="space-y-3 max-h-80 overflow-y-auto custom-scroll p-1 -m-1">
+                                        ${currentData.reminders.length > 0 ? 
+                                            currentData.reminders.map(r => `<div class="bg-yellow-100 p-3 rounded-xl shadow-md border-r-6 border-yellow-500 text-orange-900">${r}</div>`).join('') :
+                                            `<p class="text-gray-500 text-center py-10">אין תזכורות חדשות</p>`
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <div class="neumorphic-card p-6 hover:shadow-2xl transition duration-300 border-t-blue-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-blue-700 flex items-center">📄 קבצים וחומר לימודי</h3>
+                                    <div class="space-y-3 max-h-80 overflow-y-auto custom-scroll p-1 -m-1">
+                                        ${currentData.files.length > 0 ? 
+                                            currentData.files.map(f => `
+                                                <div class="bg-blue-100 p-3 rounded-xl shadow-md flex justify-between items-center border-r-6 border-blue-500">
+                                                    <div>
+                                                        <p class="font-semibold text-blue-800">${f.name}</p>
+                                                        <p class="text-sm text-gray-600">${f.date}</p>
+                                                    </div>
+                                                    <a href="${f.url}" download="${f.name}" class="btn-indigo text-white text-sm px-4 py-2 rounded-xl transition shadow-md neumorphic-btn">
+                                                        הורד 📥
+                                                    </a>
+                                                </div>
+                                            `).join('') :
+                                            `<p class="text-gray-500 text-center py-10">אין קבצים זמינים</p>`
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // --- Teacher Dashboard (Shared with Admin Class View) ---
+            if ((state.userType === 'teacher-dashboard' || state.userType === 'admin-class-view') && state.selectedClass) {
+                const currentData = getCurrentClassData();
+                const isTeacher = state.userType === 'teacher-dashboard';
+                const buttonText = isTeacher ? '🏠 חזור לדף הבית' : '🔙 חזור לדאשבורד מנהל';
+                const buttonAction = isTeacher ? 'goHome()' : 'backToAdminDashboard()';
+                const dashboardTitle = isTeacher ? 'לוח מחוונים - כיתה' : 'ניהול מורה (Admin) - כיתה';
+
+                app.innerHTML = `
+                    <div class="min-h-screen p-8">
+                        <div class="max-w-7xl mx-auto">
+                            <div class="neumorphic-card p-6 mb-8 border-b-6 border-indigo-500">
+                                <div class="flex justify-between items-center flex-wrap">
+                                    <h2 class="text-3xl font-bold text-indigo-700">${dashboardTitle} ${state.selectedClass}</h2>
+                                    <button onclick="${buttonAction}" class="btn-red neumorphic-btn px-6 py-3 font-semibold mt-3 md:mt-0 shadow-lg">
+                                        ${buttonText}
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-8">
+                                <div class="neumorphic-card p-6 border-t-indigo-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-indigo-700">📅 מערכת שעות</h3>
+                                    <div class="space-y-4">
+                                        <label class="block">
+                                            <span class="btn-indigo neumorphic-btn text-white px-6 py-3 rounded-xl cursor-pointer inline-flex items-center gap-2 transition shadow-lg">
+                                                📤 העלה תמונה חדשה
+                                            </span>
+                                            <input type="file" accept="image/*" onchange="handleScheduleUpload(event)" class="hidden">
+                                        </label>
+                                        ${currentData.scheduleImage ? `
+                                            <div class="space-y-3 p-4 border border-gray-300 rounded-xl bg-gray-50 neumorphic-card shadow-inner">
+                                                <img src="${currentData.scheduleImage}" alt="מערכת שעות" class="w-full rounded-lg border-2 border-indigo-300 cursor-pointer shadow-md" onclick="openImageModal('${currentData.scheduleImage}')">
+                                                <button onclick="deleteSchedule()" class="btn-red neumorphic-btn text-white px-4 py-2 rounded-xl w-full transition shadow-lg">
+                                                    🗑️ מחק תמונה נוכחית
+                                                </button>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                
+                                <div class="neumorphic-card p-6 border-t-orange-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-orange-700">📝 ניהול תזכורות</h3>
+                                    ${!state.showReminderInput ? `
+                                        <button onclick="showReminderForm()" class="btn-green neumorphic-btn text-white px-4 py-2 rounded-xl mb-4 w-full transition shadow-lg">
+                                            ➕ הוסף תזכורת
+                                        </button>
+                                    ` : `
+                                        <div class="mb-4 space-y-3 p-4 border border-gray-300 rounded-xl bg-gray-50 neumorphic-card shadow-inner">
+                                            <input type="text" id="reminderInput" placeholder="הזן תזכורת..." 
+                                                class="w-full px-4 py-3 rounded-xl transition neumorphic-input"
+                                                onkeypress="if(event.key==='Enter') addReminder()">
+                                            <div class="flex gap-2">
+                                                <button onclick="addReminder()" class="flex-1 btn-green neumorphic-btn shadow-lg">
+                                                    שמור
+                                                </button>
+                                                <button onclick="cancelReminder()" class="flex-1 btn-gray neumorphic-btn shadow-md">
+                                                    ביטול
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `}
+                                    <div class="space-y-3 max-h-64 overflow-y-auto custom-scroll p-1 -m-1">
+                                        ${currentData.reminders.map((r, i) => `
+                                            <div class="bg-yellow-100 p-3 rounded-xl flex justify-between items-center border-r-6 border-yellow-500 shadow-md">
+                                                <span class="text-orange-900">${r}</span>
+                                                <button onclick="deleteReminder(${i})" class="btn-gray text-red-600 p-1.5 transition neumorphic-btn shadow-sm rounded-full">❌</button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                
+                                <div class="neumorphic-card p-6 border-t-blue-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-blue-700">📄 ניהול קבצים</h3>
+                                    <label class="block mb-4">
+                                        <span class="btn-indigo neumorphic-btn text-white px-6 py-3 rounded-xl cursor-pointer inline-flex items-center gap-2 transition shadow-lg">
+                                            📤 העלה קובץ חדש
+                                        </span>
+                                        <input type="file" onchange="handleFileUpload(event)" class="hidden">
+                                    </label>
+                                    <div class="space-y-3 max-h-64 overflow-y-auto custom-scroll p-1 -m-1">
+                                        ${currentData.files.map((f, i) => `
+                                            <div class="bg-blue-100 p-3 rounded-xl flex justify-between items-center border-r-6 border-blue-500 shadow-md">
+                                                <div>
+                                                    <p class="font-semibold text-blue-800">${f.name}</p>
+                                                    <p class="text-sm text-gray-600">${f.date}</p>
+                                                </div>
+                                                <button onclick="deleteFile(${i})" class="btn-gray text-red-600 p-1.5 transition neumorphic-btn shadow-sm rounded-full">❌</button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                
+                                <div class="neumorphic-card p-6 border-t-purple-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-purple-700">👥 ניהול רשימה שמית</h3>
+                                    ${!state.showStudentInput ? `
+                                        <button onclick="showStudentForm()" class="btn-green neumorphic-btn text-white px-4 py-2 rounded-xl mb-4 w-full transition shadow-lg">
+                                            ➕ הוסף תלמיד
+                                        </button>
+                                    ` : `
+                                        <div class="mb-4 space-y-3 p-4 border border-gray-300 rounded-xl bg-gray-50 neumorphic-card shadow-inner">
+                                            <input type="text" id="studentNumber" placeholder="מספר תלמיד" 
+                                                class="w-full px-4 py-3 rounded-xl transition neumorphic-input">
+                                            <input type="text" id="studentName" placeholder="שם תלמיד" 
+                                                class="w-full px-4 py-3 rounded-xl transition neumorphic-input">
+                                            <select id="studentGender" class="w-full px-4 py-3 rounded-xl transition neumorphic-input">
+                                                <option value="">בחר מין</option>
+                                                <option value="זכר">זכר</option>
+                                                <option value="נקבה">נקבה</option>
+                                            </select>
+                                            <div class="flex gap-2 mt-2">
+                                                <button onclick="addStudent()" class="flex-1 btn-green neumorphic-btn font-semibold py-3 shadow-lg">
+                                                    שמור
+                                                </button>
+                                                <button onclick="cancelStudent()" class="flex-1 btn-gray neumorphic-btn font-semibold py-3 shadow-md">
+                                                    ביטול
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `}
+                                    <div class="space-y-3 max-h-64 overflow-y-auto custom-scroll p-1 -m-1">
+                                        ${currentData.students.map((s, i) => `
+                                            <div class="bg-purple-100 p-3 rounded-xl flex justify-between items-center border-r-6 border-purple-500 shadow-md">
+                                                <div>
+                                                    <span class="font-semibold text-purple-800">${s.number}. </span>
+                                                    <span>${s.name} </span>
+                                                    <span class="text-sm text-gray-600">(${s.gender})</span>
+                                                </div>
+                                                <button onclick="deleteStudent(${i})" class="btn-gray text-red-600 p-1.5 transition neumorphic-btn shadow-sm rounded-full">❌</button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                // Save state after every successful render of the main dashboard
+                saveState();
+                return;
+            }
+
+            // --- Generic Fallback (Used if userType is unknown) ---
+            app.innerHTML = `
+                <div class="min-h-screen flex items-center justify-center p-4">
+                    <div class="neumorphic-card p-10 max-w-md w-full border-t-indigo-500">
+                        <h2 class="text-3xl font-bold mb-4 text-indigo-700">אזור זה בבנייה</h2>
+                        <p class="mb-6 text-gray-700">אנו עובדים קשה כדי להביא לכם את הפיצ'רים הנוספים!</p>
+                        <button onclick="goHome()" class="btn-indigo neumorphic-btn px-6 py-3 font-semibold shadow-lg">
+                            חזור לדף הבית
+                        </button>
+                    </div>
+                </div>
+            `;
+            // Save state after every successful render of the main dashboard
+            saveState();
+        }
+
+        // --- NEW: Delete Activity Functions ---
+
+        function showDeleteModal(index) {
+            state.activityToDeleteIndex = index; // Store the index of the item to delete
+            const modal = document.getElementById('deleteModal');
+            document.getElementById('deleteCodeInput').value = '';
+            document.getElementById('deleteCodeError').classList.add('hidden');
+            modal.classList.remove('hidden', 'opacity-0');
+            modal.classList.add('flex', 'opacity-100');
+        }
+
+        function closeDeleteModal() {
+            state.activityToDeleteIndex = null; // Clear the index
+            const modal = document.getElementById('deleteModal');
+            modal.classList.remove('flex', 'opacity-100');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function verifyAndDeleteActivity() {
+            const code = document.getElementById('deleteCodeInput').value;
+            if (code.toUpperCase() === 'MORE') {
+                const index = state.activityToDeleteIndex;
+                if (index !== null) {
+                    state.activities.splice(index, 1);
+                    closeDeleteModal();
+                    // Save state here
+                    saveState(); 
+                    render();
+                }
+            } else {
+                document.getElementById('deleteCodeError').classList.remove('hidden');
+            }
+        }
+
+        function deleteActivity(index) {
+            showDeleteModal(index);
+        }
+
+        // --- Activity Publishing Functions ---
+        
+        function setPublishingMode(mode) {
+            state.publishingMode = mode;
+            render();
+        }
+
+        function showPublishModal() {
+            const modal = document.getElementById('publishModal');
+            document.getElementById('publishCodeInput').value = '';
+            document.getElementById('publishCodeError').classList.add('hidden');
+            modal.classList.remove('hidden', 'opacity-0');
+            modal.classList.add('flex', 'opacity-100');
+        }
+
+        function closePublishModal() {
+            const modal = document.getElementById('publishModal');
+            modal.classList.remove('flex', 'opacity-100');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function verifyAndShowPublishForm() {
+            const code = document.getElementById('publishCodeInput').value;
+            if (code.toUpperCase() === 'MORE') {
+                closePublishModal();
+                state.showActivityPublishForm = true;
+                setPublishingMode('file'); // Default to file upload
+                render();
+            } else {
+                document.getElementById('publishCodeError').classList.remove('hidden');
+            }
+        }
+
+        function cancelPublishForm() {
+            state.showActivityPublishForm = false;
+            render();
+        }
+
+        function publishActivity() {
+            const description = document.getElementById('activityDescriptionInput').value.trim();
+            const date = new Date().toLocaleDateString('he-IL');
+            
+            if (!description) {
+                alert('יש להזין תיאור או מלל לפעילות.');
+                return;
+            }
+
+            if (state.publishingMode === 'link') {
+                const url = document.getElementById('activityLinkInput');
+                if (!url.value.trim() || !url.value.trim().startsWith('http')) {
+                    alert('יש להזין קישור תקין (כולל http:// או https://).');
+                    return;
+                }
+                state.activities.push({
+                    type: 'link',
+                    url: url.value.trim(),
+                    description: description,
+                    date: date
+                });
+                state.showActivityPublishForm = false;
+                // Save state here
+                saveState();
+                render();
+
+            } else if (state.publishingMode === 'file') {
+                const fileInput = document.getElementById('activityFileInput');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    alert('יש לבחור קובץ להעלאה.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    state.activities.push({
+                        type: 'file',
+                        url: e.target.result, 
+                        name: file.name,
+                        description: description,
+                        date: date
+                    });
+                    state.showActivityPublishForm = false;
+                    // Save state here
+                    saveState();
+                    render();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // --- Other General Functions ---
+        
+        function selectUserType(type) {
+            state.userType = type;
+            // When switching to Ceremonies View, ensure no other form is open
+            if (type === 'ceremonies-view') {
+                state.showActivityPublishForm = false;
+            }
+            render();
+        }
+
+        function goHome() {
+            state.userType = null;
+            state.selectedClass = null;
+            state.studentName = '';
+            state.showActivityPublishForm = false; 
+            state.activityToDeleteIndex = null; 
+            state.publishingMode = 'file'; // Reset publishing mode
+            // Save state here
+            saveState(); 
+            render();
+        }
+
+        function handleTeacherLogin() {
+            const code = document.getElementById('teacherCodeInput').value;
+            if (code.toUpperCase() === 'MORE') {
+                state.userType = 'teacher-select-class';
+                render();
+            } else {
+                document.getElementById('codeError').classList.remove('hidden');
+            }
+        }
+
+        function selectClassTeacher(className) {
+            state.selectedClass = className;
+            state.userType = 'teacher-dashboard';
+            if (!state.classData[className]) {
+                state.classData[className] = {
+                    scheduleImage: null,
+                    reminders: [],
+                    files: [],
+                    students: []
+                };
+            }
+            render();
+        }
+
+        function selectClassStudent(className) {
+            state.selectedClass = className;
+            state.userType = 'student-name-entry';
+            if (!state.classData[className]) {
+                state.classData[className] = {
+                    scheduleImage: null,
+                    reminders: [],
+                    files: [],
+                    students: []
+                };
+            }
+            render();
+        }
+
+        function handleStudentLogin() {
+            const name = document.getElementById('studentNameInput').value;
+            const currentData = getCurrentClassData();
+            // Allow 'admin' for easy testing, or match against registered student names
+            const studentExists = name.toLowerCase() === 'admin' || currentData.students.some(s => s.name === name);
+            
+            if (studentExists) {
+                state.studentName = name;
+                state.userType = 'student-dashboard';
+                render();
+            } else {
+                document.getElementById('studentError').classList.remove('hidden');
+            }
+        }
+
+        function backToStudentSelect() {
+            state.userType = 'student';
+            state.selectedClass = null;
+            state.studentName = '';
+            render();
+        }
+
+        function backToTeacherSelect() {
+            state.userType = 'teacher-select-class';
+            state.selectedClass = null;
+            render();
+        }
+        
+        function handleScheduleUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    updateClassData('scheduleImage', e.target.result);
+                    // Save state after data update
+                    saveState(); 
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function deleteSchedule() {
+            updateClassData('scheduleImage', null);
+            // Save state after data update
+            saveState();
+        }
+
+        function showReminderForm() {
+            state.showReminderInput = true;
+            render();
+        }
+
+        function addReminder() {
+            const input = document.getElementById('reminderInput');
+            if (input && input.value.trim()) {
+                const currentData = getCurrentClassData();
+                updateClassData('reminders', [...currentData.reminders, input.value]);
+                state.showReminderInput = false;
+                // Save state after data update
+                saveState();
+            }
+        }
+
+        function cancelReminder() {
+            state.showReminderInput = false;
+            render();
+        }
+
+        function deleteReminder(index) {
+            const currentData = getCurrentClassData();
+            const newReminders = currentData.reminders.filter((_, i) => i !== index);
+            updateClassData('reminders', newReminders);
+            // Save state after data update
+            saveState();
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const currentData = getCurrentClassData();
+                    updateClassData('files', [...currentData.files, { 
+                        name: file.name, 
+                        url: e.target.result, // שומרים את ה-Data URL
+                        date: new Date().toLocaleDateString('he-IL') 
+                    }]);
+                    // Save state after data update
+                    saveState();
+                };
+                reader.readAsDataURL(file); // קוראים את הקובץ כ-Data URL
+            }
+        }
+
+        function deleteFile(index) {
+            const currentData = getCurrentClassData();
+            const newFiles = currentData.files.filter((_, i) => i !== index);
+            updateClassData('files', newFiles);
+            // Save state after data update
+            saveState();
+        }
+
+        function showStudentForm() {
+            state.showStudentInput = true;
+            render();
+        }
+
+        function addStudent() {
+            const number = document.getElementById('studentNumber').value;
+            const name = document.getElementById('studentName').value;
+            const gender = document.getElementById('studentGender').value;
+            
+            if (number && name && gender) {
+                const currentData = getCurrentClassData();
+                updateClassData('students', [...currentData.students, { number, name, gender }]);
+                state.showStudentInput = false;
+                // Save state after data update
+                saveState();
+            }
+        }
+
+        function cancelStudent() {
+            state.showStudentInput = false;
+            render();
+        }
+
+        function deleteStudent(index) {
+            const currentData = getCurrentClassData();
+            const newStudents = currentData.students.filter((_, i) => i !== index);
+            updateClassData('students', newStudents);
+            // Save state after data update
+            saveState();
+        }
+
+
+        // Load state before initial render
+        loadState();
+        // Initial render
+        render();
+    </script>
+</body>
+</html>

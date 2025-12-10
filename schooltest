@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מערכת ניהול בית ספר</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div id="app"></div>
+
+    <script>
+        // Global state
+        let state = {
+            userType: null,
+            teacherCode: '',
+            selectedClass: null,
+            studentName: '',
+            classData: {},
+            showReminderInput: false,
+            newReminder: '',
+            showStudentInput: false,
+            newStudent: { number: '', name: '', gender: '' },
+            activities: [] // Assuming you want to save activities too
+        };
+
+        const classes = ['א1', 'ב1', 'ב2', 'ג1', 'ג2', 'ג3', 'ד1', 'ד2', 'ד3', 'ד4', 'ה1', 'ה2', 'ה3', 'ה4', 'ו1', 'ו2', 'ו3'];
+        const STORAGE_KEY = 'school_management_app_data';
+
+        // --- NEW: Persistence Functions ---
+        function loadState() {
+            try {
+                const serializedState = localStorage.getItem(STORAGE_KEY);
+                if (serializedState === null) {
+                    return undefined;
+                }
+                const savedData = JSON.parse(serializedState);
+                // Only load persistence-critical data (not UI/session flags)
+                state.classData = savedData.classData || {};
+                state.activities = savedData.activities || [];
+            } catch (err) {
+                console.error("Could not load state from localStorage", err);
+                return undefined;
+            }
+        }
+
+        function saveState() {
+            try {
+                const stateToSave = {
+                    classData: state.classData,
+                    activities: state.activities // Save activities too
+                };
+                const serializedState = JSON.stringify(stateToSave);
+                localStorage.setItem(STORAGE_KEY, serializedState);
+            } catch (err) {
+                console.error("Could not save state to localStorage", err);
+            }
+        }
+        // --- END NEW: Persistence Functions ---
+
+
+        function getCurrentClassData() {
+            return state.classData[state.selectedClass] || {
+                scheduleImage: null,
+                reminders: [],
+                files: [],
+                students: []
+            };
+        }
+
+        function updateClassData(field, value) {
+            if (!state.classData[state.selectedClass]) {
+                state.classData[state.selectedClass] = {
+                    scheduleImage: null,
+                    reminders: [],
+                    files: [],
+                    students: []
+                };
+            }
+            state.classData[state.selectedClass][field] = value;
+            saveState(); // <--- SAVE STATE AFTER UPDATE
+            render();
+        }
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            // Home Screen
+            if (!state.userType) {
+                app.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center p-4">
+                        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+                            <h1 class="text-3xl font-bold text-center mb-8 text-indigo-600">מערכת בית הספר</h1>
+                            <div class="space-y-4">
+                                <button onclick="selectUserType('teacher')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 rounded-lg transition duration-200">
+                                    👨‍🏫 מורה
+                                </button>
+                                <button onclick="selectUserType('student')" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 rounded-lg transition duration-200">
+                                    👨‍🎓 תלמיד
+                                </button>
+                                <button onclick="selectUserType('view')" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 rounded-lg transition duration-200">
+                                    👀 אזור בית ספר
+                                </button>
+                                <button onclick="selectUserType('activities')" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-4 rounded-lg transition duration-200">
+                                    🎯 אזור פעילויות
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Teacher Code Entry
+            if (state.userType === 'teacher') {
+                app.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center p-4">
+                        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+                            <h2 class="text-2xl font-bold text-center mb-6 text-indigo-600">כניסת מורה</h2>
+                            <input type="password" id="teacherCodeInput" placeholder="הזן קוד מורה" 
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg mb-4 text-center text-lg">
+                            <p id="codeError" class="text-red-500 text-center mb-4 hidden">קוד שגוי</p>
+                            <div class="flex gap-4">
+                                <button onclick="handleTeacherLogin()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition duration-200">
+                                    כניסה
+                                </button>
+                                <button onclick="goHome()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 rounded-lg transition duration-200">
+                                    חזור
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Class Selection for Student
+            if (state.userType === 'student') {
+                app.innerHTML = `
+                    <div class="min-h-screen p-4">
+                        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
+                            <h2 class="text-2xl font-bold text-center mb-6 text-green-600">בחר כיתה</h2>
+                            <div class="grid grid-cols-3 md:grid-cols-5 gap-4">
+                                ${classes.map(c => `
+                                    <button onclick="selectClassStudent('${c}')" class="bg-green-100 hover:bg-green-200 text-green-700 font-semibold py-4 rounded-lg transition duration-200">
+                                        ${c}
+                                    </button>
+                                `).join('')}
+                            </div>
+                            <button onclick="goHome()" class="mt-6 w-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 rounded-lg transition duration-200">
+                                חזור לדף הבית
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Student Name Entry
+            if (state.userType === 'student-name-entry') {
+                app.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center p-4">
+                        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
+                            <h2 class="text-2xl font-bold text-center mb-2 text-green-600">כיתה ${state.selectedClass}</h2>
+                            <p class="text-center text-gray-600 mb-6">הזן את שמך</p>
+                            <input type="text" id="studentNameInput" placeholder="שם מלא" 
+                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg mb-4 text-center text-lg">
+                            <p id="studentError" class="text-red-500 text-center mb-4 hidden">שם לא נמצא ברשימה השמית</p>
+                            <div class="flex gap-4">
+                                <button onclick="handleStudentLogin()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition duration-200">
+                                    כניסה
+                                </button>
+                                <button onclick="backToStudentSelect()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 rounded-lg transition duration-200">
+                                    חזור
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Class Selection for Teacher
+            if (state.userType === 'teacher-select-class') {
+                app.innerHTML = `
+                    <div class="min-h-screen p-4">
+                        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
+                            <h2 class="text-2xl font-bold text-center mb-6 text-indigo-600">בחר כיתה</h2>
+                            <div class="grid grid-cols-3 md:grid-cols-5 gap-4">
+                                ${classes.map(c => `
+                                    <button onclick="selectClassTeacher('${c}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold py-4 rounded-lg transition duration-200">
+                                        ${c}
+                                    </button>
+                                `).join('')}
+                            </div>
+                            <button onclick="goHome()" class="mt-6 w-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 rounded-lg transition duration-200">
+                                חזור לדף הבית
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Class Selection for View
+            if (state.userType === 'view') {
+                app.innerHTML = `
+                    <div class="min-h-screen p-4">
+                        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
+                            <h2 class="text-2xl font-bold text-center mb-6 text-purple-600">צפייה במידע כיתתי</h2>
+                            <div class="grid grid-cols-3 md:grid-cols-5 gap-4">
+                                ${classes.map(c => `
+                                    <button onclick="selectClassView('${c}')" class="bg-purple-100 hover:bg-purple-200 text-purple-700 font-semibold py-4 rounded-lg transition duration-200">
+                                        ${c}
+                                    </button>
+                                `).join('')}
+                            </div>
+                            <button onclick="goHome()" class="mt-6 w-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 rounded-lg transition duration-200">
+                                חזור לדף הבית
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Activity Dashboard
+            if (state.userType === 'activities') {
+                app.innerHTML = `
+                    <div class="min-h-screen p-4">
+                        <div class="max-w-6xl mx-auto">
+                            <div class="bg-white rounded-2xl shadow-2xl p-6 mb-4 flex justify-between items-center">
+                                <h2 class="text-2xl font-bold text-orange-600">🎯 אזור פעילויות לכלל הכיתות</h2>
+                                <button onclick="goHome()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
+                                    חזור לדף הבית
+                                </button>
+                            </div>
+                            
+                            <div class="bg-white rounded-xl shadow-lg p-6 mb-4">
+                                <h3 class="text-xl font-bold mb-4 text-orange-600">פרסום פעילות (דורש קוד מורה)</h3>
+                                <button onclick="showPublishModal()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg w-full">
+                                    ➕ פרסם פעילות חדשה
+                                </button>
+                            </div>
+
+                            <div class="space-y-4">
+                                ${state.activities.length > 0 ? 
+                                    state.activities.map((activity, index) => `
+                                        <div class="bg-white rounded-xl shadow-lg p-4 flex justify-between items-center">
+                                            <div class="flex-1">
+                                                <p class="font-semibold text-gray-800">${activity.description}</p>
+                                                <p class="text-sm text-gray-500">פורסם בתאריך: ${activity.date}</p>
+                                            </div>
+                                            <button onclick="deleteActivity(${index})" class="text-red-500 hover:text-red-700 p-2">🗑️</button>
+                                        </div>
+                                    `).join('') 
+                                    : `
+                                    <div class="bg-white rounded-xl shadow-lg p-10 text-center text-gray-500">
+                                        <p class="text-lg">אין כרגע פעילויות שפורסמו.</p>
+                                    </div>
+                                    `
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    `;
+                return;
+            }
+
+
+            // Student Dashboard (Also used for View Mode)
+            if (state.userType === 'student-dashboard' || state.userType === 'view-dashboard') {
+                const currentData = getCurrentClassData();
+                const isStudent = state.userType === 'student-dashboard';
+                const color = isStudent ? 'green' : 'purple';
+                const title = isStudent ? `כיתה ${state.selectedClass}` : `מידע כיתתי - ${state.selectedClass}`;
+                const subtitle = isStudent ? `שלום, ${state.studentName}` : 'צפייה כללית';
+
+                app.innerHTML = `
+                    <div class="min-h-screen p-4">
+                        <div class="max-w-6xl mx-auto">
+                            <div class="bg-white rounded-2xl shadow-2xl p-6 mb-4">
+                                <div class="flex justify-between items-center">
+                                    <div>
+                                        <h2 class="text-2xl font-bold text-${color}-600">${title}</h2>
+                                        <p class="text-gray-600">${subtitle}</p>
+                                    </div>
+                                    <button onclick="${isStudent ? 'backToStudentSelect()' : 'backToViewSelect()'}" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
+                                        חזור לבחירת כיתה
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                <div class="bg-white rounded-xl shadow-lg p-6">
+                                    <h3 class="text-xl font-bold mb-4 text-${color}-600">📅 מערכת שעות</h3>
+                                    ${currentData.scheduleImage ? 
+                                        `<img src="${currentData.scheduleImage}" alt="מערכת שעות" class="w-full rounded-lg border-2 border-gray-300">` :
+                                        `<p class="text-gray-500 text-center py-8">אין מערכת שעות</p>`
+                                    }
+                                </div>
+                                
+                                <div class="bg-white rounded-xl shadow-lg p-6">
+                                    <h3 class="text-xl font-bold mb-4 text-${color}-600">📝 תזכורות</h3>
+                                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                                        ${currentData.reminders.length > 0 ? 
+                                            currentData.reminders.map(r => `<div class="bg-yellow-50 p-3 rounded-lg">${r}</div>`).join('') :
+                                            `<p class="text-gray-500 text-center py-8">אין תזכורות</p>`
+                                        }
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white rounded-xl shadow-lg p-6">
+                                    <h3 class="text-xl font-bold mb-4 text-${color}-600">📄 קבצים</h3>
+                                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                                        ${currentData.files.length > 0 ? 
+                                            currentData.files.map(f => `
+                                                <div class="bg-blue-50 p-3 rounded-lg">
+                                                    <p class="font-semibold">${f.name}</p>
+                                                    <p class="text-sm text-gray-600">${f.date}</p>
+                                                </div>
+                                            `).join('') :
+                                            `<p class="text-gray-500 text-center py-8">אין קבצים</p>`
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+
+            // Teacher Dashboard
+            if (state.userType === 'teacher-dashboard' && state.selectedClass) {
+                const currentData = getCurrentClassData();
+                app.innerHTML = `
+                    <div class="min-h-screen p-4">
+                        <div class="max-w-6xl mx-auto">
+                            <div class="bg-white rounded-2xl shadow-2xl p-6 mb-4">
+                                <div class="flex justify-between items-center">
+                                    <h2 class="text-2xl font-bold text-indigo-600">כיתה ${state.selectedClass}</h2>
+                                    <button onclick="backToTeacherSelect()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
+                                        חזור לבחירת כיתה
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="bg-white rounded-xl shadow-lg p-6">
+                                    <h3 class="text-xl font-bold mb-4 text-indigo-600">📅 מערכת שעות</h3>
+                                    <div class="space-y-3">
+                                        <label class="block">
+                                            <span class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer inline-flex items-center gap-2">
+                                                📤 העלה תמונה
+                                            </span>
+                                            <input type="file" accept="image/*" onchange="handleScheduleUpload(event)" class="hidden">
+                                        </label>
+                                        ${currentData.scheduleImage ? `
+                                            <div class="space-y-2">
+                                                <img src="${currentData.scheduleImage}" alt="מערכת שעות" class="w-full rounded-lg border-2 border-gray-300">
+                                                <button onclick="deleteSchedule()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg w-full">
+                                                    🗑️ מחק תמונה
+                                                </button>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white rounded-xl shadow-lg p-6">
+                                    <h3 class="text-xl font-bold mb-4 text-indigo-600">📝 תזכורות</h3>
+                                    ${!state.showReminderInput ? `
+                                        <button onclick="showReminderForm()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg mb-4 w-full">
+                                            הוסף תזכורת
+                                        </button>
+                                    ` : `
+                                        <div class="mb-4 space-y-2">
+                                            <input type="text" id="reminderInput" placeholder="הזן תזכורת..." 
+                                                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg"
+                                                onkeypress="if(event.key==='Enter') addReminder()">
+                                            <div class="flex gap-2">
+                                                <button onclick="addReminder()" class="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                                                    שמור
+                                                </button>
+                                                <button onclick="cancelReminder()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
+                                                    ביטול
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `}
+                                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                                        ${currentData.reminders.map((r, i) => `
+                                            <div class="bg-yellow-50 p-3 rounded-lg flex justify-between items-center">
+                                                <span>${r}</span>
+                                                <button onclick="deleteReminder(${i})" class="text-red-500 hover:text-red-700">❌</button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white rounded-xl shadow-lg p-6">
+                                    <h3 class="text-xl font-bold mb-4 text-indigo-600">📄 קבצים</h3>
+                                    <label class="block mb-4">
+                                        <span class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer inline-flex items-center gap-2">
+                                            📤 העלה קובץ
+                                        </span>
+                                        <input type="file" onchange="handleFileUpload(event)" class="hidden">
+                                    </label>
+                                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                                        ${currentData.files.map((f, i) => `
+                                            <div class="bg-blue-50 p-3 rounded-lg flex justify-between items-center">
+                                                <div>
+                                                    <p class="font-semibold">${f.name}</p>
+                                                    <p class="text-sm text-gray-600">${f.date}</p>
+                                                </div>
+                                                <button onclick="deleteFile(${i})" class="text-red-500 hover:text-red-700">❌</button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white rounded-xl shadow-lg p-6">
+                                    <h3 class="text-xl font-bold mb-4 text-indigo-600">👥 רשימה שמית</h3>
+                                    ${!state.showStudentInput ? `
+                                        <button onclick="showStudentForm()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg mb-4 w-full">
+                                            הוסף תלמיד
+                                        </button>
+                                    ` : `
+                                        <div class="mb-4 space-y-2">
+                                            <input type="text" id="studentNumber" placeholder="מספר תלמיד" 
+                                                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg">
+                                            <input type="text" id="studentName" placeholder="שם תלמיד" 
+                                                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg">
+                                            <select id="studentGender" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg">
+                                                <option value="">בחר מין</option>
+                                                <option value="בן">בן</option>
+                                                <option value="בת">בת</option>
+                                            </select>
+                                            <div class="flex gap-2">
+                                                <button onclick="addStudent()" class="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                                                    שמור
+                                                </button>
+                                                <button onclick="cancelStudent()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
+                                                    ביטול
+                                                </button>
+                                            </div>
+                                        </div>
+                                    `}
+                                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                                        ${currentData.students.map((s, i) => `
+                                            <div class="bg-purple-50 p-3 rounded-lg flex justify-between items-center">
+                                                <div>
+                                                    <span class="font-semibold">${s.number}. </span>
+                                                    <span>${s.name} </span>
+                                                    <span class="text-gray-600">(${s.gender})</span>
+                                                </div>
+                                                <button onclick="deleteStudent(${i})" class="text-red-500 hover:text-red-700">❌</button>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // Placeholder for other types
+            app.innerHTML = `
+                <div class="min-h-screen flex items-center justify-center p-4">
+                    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
+                        <h2 class="text-2xl font-bold mb-4 text-indigo-600">אזור זה בבנייה</h2>
+                        <button onclick="goHome()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg">
+                            חזור לדף הבית
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Event handlers
+        function selectUserType(type) {
+            state.userType = type;
+            render();
+        }
+
+        function goHome() {
+            state.userType = null;
+            state.selectedClass = null;
+            state.studentName = '';
+            render();
+        }
+
+        function handleTeacherLogin() {
+            const code = document.getElementById('teacherCodeInput').value;
+            if (code.toUpperCase() === 'MORE') {
+                state.userType = 'teacher-select-class';
+                render();
+            } else {
+                document.getElementById('codeError').classList.remove('hidden');
+            }
+        }
+
+        function selectClassTeacher(className) {
+            state.selectedClass = className;
+            state.userType = 'teacher-dashboard';
+            if (!state.classData[className]) {
+                state.classData[className] = {
+                    scheduleImage: null,
+                    reminders: [],
+                    files: [],
+                    students: []
+                };
+            }
+            render();
+        }
+
+        function selectClassStudent(className) {
+            state.selectedClass = className;
+            state.userType = 'student-name-entry';
+            if (!state.classData[className]) {
+                state.classData[className] = {
+                    scheduleImage: null,
+                    reminders: [],
+                    files: [],
+                    students: []
+                };
+            }
+            render();
+        }
+        
+        function selectClassView(className) {
+            state.selectedClass = className;
+            state.userType = 'view-dashboard';
+            if (!state.classData[className]) {
+                state.classData[className] = {
+                    scheduleImage: null,
+                    reminders: [],
+                    files: [],
+                    students: []
+                };
+            }
+            render();
+        }
+
+        function backToViewSelect() {
+            state.userType = 'view';
+            state.selectedClass = null;
+            render();
+        }
+
+
+        function handleStudentLogin() {
+            const name = document.getElementById('studentNameInput').value;
+            const currentData = getCurrentClassData();
+            const studentExists = currentData.students.some(s => s.name === name);
+            
+            if (name.toLowerCase() === 'admin' || studentExists) {
+                state.studentName = name;
+                state.userType = 'student-dashboard';
+                render();
+            } else {
+                document.getElementById('studentError').classList.remove('hidden');
+            }
+        }
+
+        function backToStudentSelect() {
+            state.userType = 'student';
+            state.selectedClass = null;
+            state.studentName = '';
+            render();
+        }
+
+        function backToTeacherSelect() {
+            state.userType = 'teacher-select-class';
+            state.selectedClass = null;
+            render();
+        }
+
+        function handleScheduleUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    updateClassData('scheduleImage', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function deleteSchedule() {
+            updateClassData('scheduleImage', null);
+        }
+
+        function showReminderForm() {
+            state.showReminderInput = true;
+            render();
+        }
+
+        function addReminder() {
+            const input = document.getElementById('reminderInput');
+            if (input && input.value.trim()) {
+                const currentData = getCurrentClassData();
+                updateClassData('reminders', [...currentData.reminders, input.value]);
+                state.showReminderInput = false;
+            }
+        }
+
+        function cancelReminder() {
+            state.showReminderInput = false;
+            render();
+        }
+
+        function deleteReminder(index) {
+            const currentData = getCurrentClassData();
+            const newReminders = currentData.reminders.filter((_, i) => i !== index);
+            updateClassData('reminders', newReminders);
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const currentData = getCurrentClassData();
+                updateClassData('files', [...currentData.files, { 
+                    name: file.name, 
+                    date: new Date().toLocaleDateString('he-IL') 
+                }]);
+            }
+        }
+
+        function deleteFile(index) {
+            const currentData = getCurrentClassData();
+            const newFiles = currentData.files.filter((_, i) => i !== index);
+            updateClassData('files', newFiles);
+        }
+
+        function showStudentForm() {
+            state.showStudentInput = true;
+            render();
+        }
+
+        function addStudent() {
+            const number = document.getElementById('studentNumber').value;
+            const name = document.getElementById('studentName').value;
+            const gender = document.getElementById('studentGender').value;
+            
+            if (number && name && gender) {
+                const currentData = getCurrentClassData();
+                updateClassData('students', [...currentData.students, { number, name, gender }]);
+                state.showStudentInput = false;
+            }
+        }
+
+        function cancelStudent() {
+            state.showStudentInput = false;
+            render();
+        }
+
+        function deleteStudent(index) {
+            const currentData = getCurrentClassData();
+            const newStudents = currentData.students.filter((_, i) => i !== index);
+            updateClassData('students', newStudents);
+        }
+        
+        // --- Activity Functions (Placeholder - need to define showPublishModal, deleteActivity, etc. if you want them to work) ---
+        function showPublishModal() {
+            alert("פונקציית פרסום פעילות דורשת מימוש של חלון מודאלי.");
+        }
+        function deleteActivity(index) {
+             state.activities.splice(index, 1);
+             saveState(); 
+             render();
+        }
+        // --- End Activity Functions ---
+
+
+        // Initial load and render
+        loadState();
+        render();
+    </script>
+</body>
+</html>

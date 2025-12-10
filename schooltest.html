@@ -8,61 +8,276 @@
     <style>
         * {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            box-sizing: border-box;
         }
+        
+        /* Neumorphism Base Background (Lighter for contrast) */
+        .body-bg {
+            background: #e6e9ee; /* בסיס בהיר יותר */
+        }
+
+        /* --- HARD NEUMORPHISM STYLES --- */
+
+        /* General Neumorphism Shadow Mixin (applies to large containers/cards) */
+        .neumorphic-card {
+            border-radius: 24px; /* פינות עגולות יותר */
+            background: #e6e9ee;
+            /* צללים מודגשים ומרוחקים */
+            box-shadow: 15px 15px 30px #a3a6ab, 
+                        -15px -15px 30px #ffffff;
+            transition: all 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* אנימציה חלקה */
+        }
+        .neumorphic-card:hover {
+            box-shadow: 12px 12px 24px #a3a6ab, 
+                        -12px -12px 24px #ffffff;
+            transform: translateY(-3px); /* הרמה קלה בריחוף */
+        }
+
+        /* Improved Buttons Style - The main elevated effect */
+        .neumorphic-btn {
+            border-radius: 16px;
+            background: #e6e9ee;
+            /* צללים מוגדרים יותר */
+            box-shadow: 8px 8px 16px #a3a6ab, 
+                        -8px -8px 16px #ffffff;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            border: none;
+        }
+        
+        /* Deep press effect on active (applies to all neumorphic buttons) */
+        .neumorphic-btn:active {
+            box-shadow: inset 5px 5px 10px #a3a6ab, 
+                        inset -5px -5px 10px #ffffff;
+            transform: scale(0.96); /* לחיצה עמוקה יותר */
+        }
+        
+        /* Neumorphic Input/Select Style (the sunken effect) */
+        .neumorphic-input {
+            border-radius: 12px;
+            /* אפקט שקיעה עמוק */
+            box-shadow: inset 4px 4px 8px #a3a6ab, 
+                        inset -4px -4px 8px #ffffff;
+            border: none;
+            background: #e6e9ee;
+            transition: all 0.3s ease;
+        }
+        .neumorphic-input:focus {
+            outline: none;
+            border: 2px solid #4f46e5; /* Indigo */
+            box-shadow: inset 4px 4px 8px #a3a6ab, 
+                        inset -4px -4px 8px #ffffff;
+        }
+
+        /* Custom Scrollbar for better appearance */
+        .custom-scroll::-webkit-scrollbar {
+            width: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+            background-color: #9ca3af;
+            border-radius: 20px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+            background-color: #e6e9ee;
+        }
+
+        /* --- GRADIENT BUTTONS AND COLOR OVERRIDES --- */
+        
+        .btn-indigo { background: linear-gradient(145deg, #4f46e5, #3c30c3); color: white; box-shadow: 0 6px 15px rgba(79, 70, 229, 0.4); }
+        .btn-green { background: linear-gradient(145deg, #10b981, #0c9165); color: white; box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4); }
+        .btn-purple { background: linear-gradient(145deg, #8b5cf6, #6e44c3); color: white; box-shadow: 0 6px 15px rgba(139, 92, 246, 0.4); }
+        .btn-orange { background: linear-gradient(145deg, #f59e0b, #d4830a); color: white; box-shadow: 0 6px 15px rgba(245, 158, 11, 0.4); }
+        .btn-red { background: linear-gradient(145deg, #ef4444, #c93535); color: white; box-shadow: 0 6px 15px rgba(239, 68, 68, 0.4); }
+        .btn-gray { background: #e6e9ee; color: #4b5563; }
+        .btn-gray:hover { background: #d0d5dc; }
+
+        /* WOW Hover Effect for Gradient Buttons */
+        .btn-indigo:hover { background: linear-gradient(160deg, #4f46e5, #3c30c3); box-shadow: 0 10px 20px rgba(79, 70, 229, 0.6); transform: translateY(-4px); }
+        .btn-green:hover { background: linear-gradient(160deg, #10b981, #0c9165); box-shadow: 0 10px 20px rgba(16, 185, 129, 0.6); transform: translateY(-4px); }
+        .btn-purple:hover { background: linear-gradient(160deg, #8b5cf6, #6e44c3); box-shadow: 0 10px 20px rgba(139, 92, 246, 0.6); transform: translateY(-4px); }
+        .btn-orange:hover { background: linear-gradient(160deg, #f59e0b, #d4830a); box-shadow: 0 10px 20px rgba(245, 158, 11, 0.6); transform: translateY(-4px); }
+        .btn-red:hover { background: linear-gradient(160deg, #ef4444, #c93535); box-shadow: 0 10px 20px rgba(239, 68, 68, 0.6); transform: translateY(-4px); }
+        
+        /* Ensure gradient buttons still have the press feel (override neumorphic-btn:active shadow) */
+        .btn-indigo:active, .btn-green:active, .btn-purple:active, .btn-orange:active, .btn-red:active {
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); /* Flatter, deeper shadow on press */
+            transform: scale(0.98); 
+        }
+
+        /* --- SIDEBAR STYLE BUTTONS (FOR MAIN SCREEN) --- */
+        .sidebar-btn {
+            border-radius: 18px;
+            padding: 1.5rem; 
+            text-align: right;
+            position: relative;
+            overflow: hidden;
+            font-size: 1.5rem;
+        }
+
+        /* Card Header Border Colors for visual separation */
+        .border-t-indigo-500 { border-top: 6px solid #4f46e5; }
+        .border-t-green-500 { border-top: 6px solid #10b981; }
+        .border-t-yellow-500 { border-top: 6px solid #f59e0b; }
+        .border-t-blue-500 { border-top: 6px solid #3b82f6; }
+        .border-t-purple-500 { border-top: 6px solid #8b5cf6; }
+        .border-t-orange-500 { border-top: 6px solid #f59e0b; }
+
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+<body class="body-bg min-h-screen">
     <div id="app"></div>
 
+    <div id="publishModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0" onclick="closePublishModal()">
+        <div class="neumorphic-card p-8 max-w-md w-full relative" onclick="event.stopPropagation()">
+            <button onclick="closePublishModal()" class="absolute top-4 left-4 btn-red text-white rounded-full h-8 w-8 flex items-center justify-center text-xl font-bold transition neumorphic-btn shadow-lg">
+                &times;
+            </button>
+            <h3 class="text-2xl font-bold text-center mb-6 text-indigo-700 border-b-2 border-indigo-200 pb-2">אישור פרסום</h3>
+            <p class="text-center text-gray-700 mb-4">הזן קוד מורה כדי לפרסם פעילות:</p>
+            <input type="password" id="publishCodeInput" placeholder="קוד מורה" 
+                class="w-full px-4 py-3 rounded-xl mb-6 text-center text-lg transition neumorphic-input">
+            <p id="publishCodeError" class="text-red-500 text-center mb-4 hidden">קוד שגוי</p>
+            <div class="flex gap-4">
+                <button onclick="verifyAndShowPublishForm()" class="flex-1 btn-indigo neumorphic-btn font-semibold py-3 shadow-lg">
+                    אישור
+                </button>
+                <button onclick="closePublishModal()" class="flex-1 btn-gray neumorphic-btn font-semibold py-3 shadow-md">
+                    ביטול
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0" onclick="closeDeleteModal()">
+        <div class="neumorphic-card p-8 max-w-md w-full relative" onclick="event.stopPropagation()">
+            <button onclick="closeDeleteModal()" class="absolute top-4 left-4 btn-red text-white rounded-full h-8 w-8 flex items-center justify-center text-xl font-bold transition neumorphic-btn shadow-lg">
+                &times;
+            </button>
+            <h3 class="text-2xl font-bold text-center mb-6 text-red-700 border-b-2 border-red-200 pb-2">אישור מחיקה</h3>
+            <p class="text-center text-gray-700 mb-4">הזן קוד מורה כדי לאשר מחיקת פעילות:</p>
+            <input type="password" id="deleteCodeInput" placeholder="קוד מורה" 
+                class="w-full px-4 py-3 rounded-xl mb-6 text-center text-lg transition neumorphic-input focus:border-red-500">
+            <p id="deleteCodeError" class="text-red-500 text-center mb-4 hidden">קוד שגוי</p>
+            <div class="flex gap-4">
+                <button onclick="verifyAndDeleteActivity()" class="flex-1 btn-red text-white font-semibold py-3 shadow-lg neumorphic-btn">
+                    אישור מחיקה
+                </button>
+                <button onclick="closeDeleteModal()" class="flex-1 btn-gray neumorphic-btn font-semibold py-3 shadow-md">
+                    ביטול
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-75 hidden items-center justify-center p-4 z-50 transition-opacity duration-300 opacity-0" onclick="closeModal()">
+        <div class="max-w-4xl max-h-[90vh] p-4 neumorphic-card relative" onclick="event.stopPropagation()">
+            <button onclick="closeModal()" class="absolute -top-3 -left-3 btn-red text-white rounded-full h-8 w-8 flex items-center justify-center text-xl font-bold transition neumorphic-btn shadow-md">
+                &times;
+            </button>
+            <img id="modalImage" src="" alt="מערכת שעות מוגדלת" class="max-w-full max-h-[85vh] object-contain rounded-xl">
+        </div>
+    </div>
+
+
     <script>
-        // Global state
+        // Global state (Holds all temporary data for the current session)
         let state = {
             userType: null,
             teacherCode: '',
             selectedClass: null,
             studentName: '',
-            classData: {},
+            // Data that needs to be persistent across machines:
+            classData: {}, 
+            activities: [], 
+            // End of persistent data
             showReminderInput: false,
             newReminder: '',
             showStudentInput: false,
             newStudent: { number: '', name: '', gender: '' },
-            activities: [] // Assuming you want to save activities too
+            showActivityPublishForm: false, 
+            publishingMode: 'file',
+            activityToDeleteIndex: null 
         };
 
         const classes = ['א1', 'ב1', 'ב2', 'ג1', 'ג2', 'ג3', 'ד1', 'ד2', 'ד3', 'ד4', 'ה1', 'ה2', 'ה3', 'ה4', 'ו1', 'ו2', 'ו3'];
-        const STORAGE_KEY = 'school_management_app_data';
 
-        // --- NEW: Persistence Functions ---
-        function loadState() {
+        
+        // =========================================================
+        // === PERSISTENCE LAYER (Client-Server Integration)     ===
+        // =========================================================
+
+        /**
+         * פונקציית שמירה: דורשת שרת/בסיס נתונים אמיתי כדי לעבוד בין מחשבים.
+         * כרגע משתמשת ב-localStorage לשמירה מקומית (עובד אחרי ריענון, לא בין מחשבים).
+         */
+        async function saveStateToDatabase(data) {
+            console.log("Saving data to conceptual database...");
+            
+            // --- שלב 1: החלף את זה בקריאה ל-API אמיתי ---
+            /*
             try {
-                const serializedState = localStorage.getItem(STORAGE_KEY);
-                if (serializedState === null) {
-                    return undefined;
-                }
-                const savedData = JSON.parse(serializedState);
-                // Only load persistence-critical data (not UI/session flags)
-                state.classData = savedData.classData || {};
-                state.activities = savedData.activities || [];
-            } catch (err) {
-                console.error("Could not load state from localStorage", err);
-                return undefined;
+                const response = await fetch('YOUR_SERVER_SAVE_API_ENDPOINT', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                if (!response.ok) throw new Error('Failed to save data on server');
+                // אם אתה מצליח לשמור בשרת, בטל את השורה של localStorage למטה
+            } catch (error) {
+                console.error("Save error: You need a real backend to save data across machines.", error);
             }
+            */
+            
+            // --- שלב 2: פתרון זמני לשמירה אחרי ריענון (על אותו מחשב בלבד!) ---
+            localStorage.setItem('school_data', JSON.stringify(data));
         }
 
-        function saveState() {
+        /**
+         * פונקציית טעינה: דורשת שרת/בסיס נתונים אמיתי כדי לטעון נתונים בין מחשבים.
+         */
+        async function loadStateFromDatabase() {
+            console.log("Loading data from conceptual database...");
+            
+            // --- שלב 1: החלף את זה בקריאה ל-API אמיתי ---
+            /*
             try {
-                const stateToSave = {
-                    classData: state.classData,
-                    activities: state.activities // Save activities too
-                };
-                const serializedState = JSON.stringify(stateToSave);
-                localStorage.setItem(STORAGE_KEY, serializedState);
-            } catch (err) {
-                console.error("Could not save state to localStorage", err);
+                const response = await fetch('YOUR_SERVER_LOAD_API_ENDPOINT');
+                if (!response.ok) throw new Error('Failed to load data from server');
+                const loadedData = await response.json();
+                return loadedData; // אם השרת החזיר נתונים
+            } catch (error) {
+                console.error("Load error: Using local data as fallback.");
+                // אם יש שגיאה, נמשיך לנסות לטעון מ-localStorage
             }
+            */
+            
+            // --- שלב 2: פתרון זמני לטעינה אחרי ריענון (על אותו מחשב בלבד!) ---
+            const storedData = localStorage.getItem('school_data');
+            if (storedData) {
+                return JSON.parse(storedData);
+            }
+            return null; // אם אין נתונים
         }
-        // --- END NEW: Persistence Functions ---
 
+        /**
+         * פונקציית עזר לשמירה ועדכון ה-UI.
+         * חובה לקרוא לה לאחר כל שינוי בנתונים הגלובליים (classData, activities).
+         */
+        function saveAndRender() {
+            // הנתונים שאנחנו רוצים לשמור בבסיס הנתונים
+            const dataToSave = {
+                classData: state.classData,
+                activities: state.activities
+            };
+            saveStateToDatabase(dataToSave);
+            render(); 
+        }
+
+        // =========================================================
+        // === STATE MANAGEMENT FUNCTIONS (Refactored)           ===
+        // =========================================================
 
         function getCurrentClassData() {
             return state.classData[state.selectedClass] || {
@@ -83,54 +298,92 @@
                 };
             }
             state.classData[state.selectedClass][field] = value;
-            saveState(); // <--- SAVE STATE AFTER UPDATE
-            render();
+            saveAndRender(); // שינוי: קורא ל-saveAndRender במקום render
+        }
+
+        function openImageModal(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            document.getElementById('modalImage').src = imageSrc;
+            modal.classList.remove('hidden', 'opacity-0');
+            modal.classList.add('flex', 'opacity-100');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.remove('flex', 'opacity-100');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function renderPublishForm() {
+            return `
+                <div class="neumorphic-card p-5 shadow-inner w-full border-2 border-orange-300 bg-gray-50">
+                    <h4 class="text-xl font-bold text-orange-700 mb-4 border-b pb-2">פרסום פעילות חדשה:</h4>
+                    
+                    <div class="flex mb-4 gap-2">
+                        <button onclick="setPublishingMode('file')" class="flex-1 py-2 rounded-xl font-semibold transition ${state.publishingMode === 'file' ? 'bg-orange-600 text-white shadow-lg' : 'btn-gray text-gray-700 border border-gray-300 neumorphic-btn shadow-none'}">
+                            קובץ / מצגת
+                        </button>
+                        <button onclick="setPublishingMode('link')" class="flex-1 py-2 rounded-xl font-semibold transition ${state.publishingMode === 'link' ? 'bg-orange-600 text-white shadow-lg' : 'btn-gray text-gray-700 border border-gray-300 neumorphic-btn shadow-none'}">
+                            קישור לאתר
+                        </button>
+                    </div>
+
+                    ${state.publishingMode === 'file' ? `
+                        <label class="block mb-3">
+                            <span class="text-gray-700 block mb-1">העלאת קובץ:</span>
+                            <input type="file" id="activityFileInput" 
+                                class="w-full p-2 rounded-xl bg-white neumorphic-input">
+                        </label>
+                    ` : `
+                        <label class="block mb-3">
+                            <span class="text-gray-700 block mb-1">הכנס קישור (URL):</span>
+                            <input type="url" id="activityLinkInput" placeholder="https://"
+                                class="w-full px-4 py-2 rounded-xl transition neumorphic-input focus:border-orange-500">
+                        </label>
+                    `}
+
+                    <label class="block mb-4">
+                        <span class="text-gray-700 block mb-1">הוסף תיאור / מלל:</span>
+                        <textarea id="activityDescriptionInput" placeholder="נושא הפעילות, הוראות..."
+                            class="w-full px-4 py-2 rounded-xl h-20 resize-none neumorphic-input focus:border-orange-500"></textarea>
+                    </label>
+
+                    <div class="flex gap-2">
+                        <button onclick="publishActivity()" class="flex-1 btn-indigo neumorphic-btn font-semibold py-3 shadow-lg transition">
+                            פרסם פעילות
+                        </button>
+                        <button onclick="cancelPublishForm()" class="flex-1 btn-gray neumorphic-btn font-semibold py-3 shadow-md transition">
+                            ביטול
+                        </button>
+                    </div>
+                </div>
+            `;
         }
 
         function render() {
             const app = document.getElementById('app');
             
-            // Home Screen
+            // --- Home Screen ---
             if (!state.userType) {
                 app.innerHTML = `
                     <div class="min-h-screen flex items-center justify-center p-4">
-                        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-                            <h1 class="text-3xl font-bold text-center mb-8 text-indigo-600">מערכת בית הספר</h1>
-                            <div class="space-y-4">
-                                <button onclick="selectUserType('teacher')" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-4 rounded-lg transition duration-200">
-                                    👨‍🏫 מורה
+                        <div class="neumorphic-card p-12 max-w-lg w-full">
+                            <h1 class="text-4xl font-extrabold text-center mb-10 text-indigo-800 border-b-4 border-indigo-300 pb-3">מערכת ניהול בית הספר</h1>
+                            <div class="space-y-6">
+                                <button onclick="selectUserType('teacher')" class="w-full btn-indigo neumorphic-btn sidebar-btn font-bold py-5 text-xl">
+                                    <span class="float-right">👨‍🏫 כניסת מורה</span>
                                 </button>
-                                <button onclick="selectUserType('student')" class="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-4 rounded-lg transition duration-200">
-                                    👨‍🎓 תלמיד
+                                <button onclick="selectUserType('student')" class="w-full btn-green neumorphic-btn sidebar-btn font-bold py-5 text-xl">
+                                    <span class="float-right">👨‍🎓 כניסת תלמיד</span>
                                 </button>
-                                <button onclick="selectUserType('view')" class="w-full bg-purple-600 hover:bg-purple-700 text-white font-semibold py-4 rounded-lg transition duration-200">
-                                    👀 אזור בית ספר
+                                <button onclick="selectUserType('view')" class="w-full btn-purple neumorphic-btn sidebar-btn font-bold py-5 text-xl">
+                                    <span class="float-right">🏫 אזור בית ספר</span>
                                 </button>
-                                <button onclick="selectUserType('activities')" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-semibold py-4 rounded-lg transition duration-200">
-                                    🎯 אזור פעילויות
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            // Teacher Code Entry
-            if (state.userType === 'teacher') {
-                app.innerHTML = `
-                    <div class="min-h-screen flex items-center justify-center p-4">
-                        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-                            <h2 class="text-2xl font-bold text-center mb-6 text-indigo-600">כניסת מורה</h2>
-                            <input type="password" id="teacherCodeInput" placeholder="הזן קוד מורה" 
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg mb-4 text-center text-lg">
-                            <p id="codeError" class="text-red-500 text-center mb-4 hidden">קוד שגוי</p>
-                            <div class="flex gap-4">
-                                <button onclick="handleTeacherLogin()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 rounded-lg transition duration-200">
-                                    כניסה
-                                </button>
-                                <button onclick="goHome()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 rounded-lg transition duration-200">
-                                    חזור
+                                <button onclick="selectUserType('activities')" class="w-full btn-orange neumorphic-btn sidebar-btn font-bold py-5 text-xl">
+                                    <span class="float-right">🎯 אזור פעילויות</span>
                                 </button>
                             </div>
                         </div>
@@ -139,193 +392,211 @@
                 return;
             }
 
-            // Class Selection for Student
-            if (state.userType === 'student') {
-                app.innerHTML = `
-                    <div class="min-h-screen p-4">
-                        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
-                            <h2 class="text-2xl font-bold text-center mb-6 text-green-600">בחר כיתה</h2>
-                            <div class="grid grid-cols-3 md:grid-cols-5 gap-4">
-                                ${classes.map(c => `
-                                    <button onclick="selectClassStudent('${c}')" class="bg-green-100 hover:bg-green-200 text-green-700 font-semibold py-4 rounded-lg transition duration-200">
-                                        ${c}
-                                    </button>
-                                `).join('')}
-                            </div>
-                            <button onclick="goHome()" class="mt-6 w-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 rounded-lg transition duration-200">
-                                חזור לדף הבית
-                            </button>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            // Student Name Entry
-            if (state.userType === 'student-name-entry') {
-                app.innerHTML = `
-                    <div class="min-h-screen flex items-center justify-center p-4">
-                        <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full">
-                            <h2 class="text-2xl font-bold text-center mb-2 text-green-600">כיתה ${state.selectedClass}</h2>
-                            <p class="text-center text-gray-600 mb-6">הזן את שמך</p>
-                            <input type="text" id="studentNameInput" placeholder="שם מלא" 
-                                class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg mb-4 text-center text-lg">
-                            <p id="studentError" class="text-red-500 text-center mb-4 hidden">שם לא נמצא ברשימה השמית</p>
-                            <div class="flex gap-4">
-                                <button onclick="handleStudentLogin()" class="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition duration-200">
-                                    כניסה
-                                </button>
-                                <button onclick="backToStudentSelect()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 rounded-lg transition duration-200">
-                                    חזור
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            // Class Selection for Teacher
-            if (state.userType === 'teacher-select-class') {
-                app.innerHTML = `
-                    <div class="min-h-screen p-4">
-                        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
-                            <h2 class="text-2xl font-bold text-center mb-6 text-indigo-600">בחר כיתה</h2>
-                            <div class="grid grid-cols-3 md:grid-cols-5 gap-4">
-                                ${classes.map(c => `
-                                    <button onclick="selectClassTeacher('${c}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-semibold py-4 rounded-lg transition duration-200">
-                                        ${c}
-                                    </button>
-                                `).join('')}
-                            </div>
-                            <button onclick="goHome()" class="mt-6 w-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 rounded-lg transition duration-200">
-                                חזור לדף הבית
-                            </button>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            // Class Selection for View
-            if (state.userType === 'view') {
-                app.innerHTML = `
-                    <div class="min-h-screen p-4">
-                        <div class="max-w-4xl mx-auto bg-white rounded-2xl shadow-2xl p-8">
-                            <h2 class="text-2xl font-bold text-center mb-6 text-purple-600">צפייה במידע כיתתי</h2>
-                            <div class="grid grid-cols-3 md:grid-cols-5 gap-4">
-                                ${classes.map(c => `
-                                    <button onclick="selectClassView('${c}')" class="bg-purple-100 hover:bg-purple-200 text-purple-700 font-semibold py-4 rounded-lg transition duration-200">
-                                        ${c}
-                                    </button>
-                                `).join('')}
-                            </div>
-                            <button onclick="goHome()" class="mt-6 w-full bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-3 rounded-lg transition duration-200">
-                                חזור לדף הבית
-                            </button>
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            // Activity Dashboard
+            // --- Activity Dashboard ---
             if (state.userType === 'activities') {
                 app.innerHTML = `
-                    <div class="min-h-screen p-4">
-                        <div class="max-w-6xl mx-auto">
-                            <div class="bg-white rounded-2xl shadow-2xl p-6 mb-4 flex justify-between items-center">
-                                <h2 class="text-2xl font-bold text-orange-600">🎯 אזור פעילויות לכלל הכיתות</h2>
-                                <button onclick="goHome()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
-                                    חזור לדף הבית
-                                </button>
+                    <div class="min-h-screen p-8">
+                        <div class="max-w-7xl mx-auto">
+                            <div class="neumorphic-card p-6 mb-8 border-b-6 border-orange-500">
+                                <div class="flex justify-between items-center flex-wrap">
+                                    <h2 class="text-3xl font-bold text-orange-700">🎯 אזור פעילויות לכלל הכיתות</h2>
+                                    <button onclick="goHome()" class="btn-red neumorphic-btn px-6 py-3 font-semibold mt-3 md:mt-0 shadow-lg">
+                                        🏠 חזור לדף הבית
+                                    </button>
+                                </div>
+                                <div class="mt-6 flex justify-end">
+                                    ${!state.showActivityPublishForm ? `
+                                        <button onclick="showPublishModal()" class="btn-green neumorphic-btn px-6 py-3 font-semibold shadow-lg">
+                                            ➕ פרסם פעילות חדשה (דורש קוד מורה)
+                                        </button>
+                                    ` : renderPublishForm()}
+                                </div>
                             </div>
                             
-                            <div class="bg-white rounded-xl shadow-lg p-6 mb-4">
-                                <h3 class="text-xl font-bold mb-4 text-orange-600">פרסום פעילות (דורש קוד מורה)</h3>
-                                <button onclick="showPublishModal()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg w-full">
-                                    ➕ פרסם פעילות חדשה
-                                </button>
-                            </div>
-
+                            <h3 class="text-2xl font-bold text-gray-700 mb-6">📖 פעילויות שפורסמו:</h3>
                             <div class="space-y-4">
                                 ${state.activities.length > 0 ? 
                                     state.activities.map((activity, index) => `
-                                        <div class="bg-white rounded-xl shadow-lg p-4 flex justify-between items-center">
+                                        <div class="neumorphic-card p-5 border-l-6 border-orange-400 flex justify-between items-start hover:shadow-2xl">
                                             <div class="flex-1">
-                                                <p class="font-semibold text-gray-800">${activity.description}</p>
-                                                <p class="text-sm text-gray-500">פורסם בתאריך: ${activity.date}</p>
+                                                <p class="text-lg font-semibold text-gray-800 mb-1">${activity.description}</p>
+                                                ${activity.type === 'link' ? `
+                                                    <a href="${activity.url}" target="_blank" class="text-blue-600 hover:text-blue-800 underline font-medium break-all">
+                                                        🔗 קישור לפעילות
+                                                    </a>
+                                                ` : `
+                                                    <a href="${activity.url}" download="${activity.name}" class="text-blue-600 hover:text-blue-800 underline font-medium">
+                                                        📄 הורד קובץ: ${activity.name}
+                                                    </a>
+                                                `}
+                                                <p class="text-sm text-gray-500 mt-2">פורסם בתאריך: ${activity.date}</p>
                                             </div>
-                                            <button onclick="deleteActivity(${index})" class="text-red-500 hover:text-red-700 p-2">🗑️</button>
+                                            <button onclick="deleteActivity(${index})" class="btn-gray text-red-600 p-2 rounded-full transition neumorphic-btn shadow-md mr-4" title="מחק פעילות">
+                                                🗑️
+                                            </button>
                                         </div>
                                     `).join('') 
                                     : `
-                                    <div class="bg-white rounded-xl shadow-lg p-10 text-center text-gray-500">
-                                        <p class="text-lg">אין כרגע פעילויות שפורסמו.</p>
+                                    <div class="neumorphic-card p-10 text-center text-gray-500">
+                                        <p class="text-xl">אין כרגע פעילויות שפורסמו.</p>
+                                        <p>הקש על "פרסם פעילות חדשה" כדי להוסיף תוכן.</p>
                                     </div>
                                     `
                                 }
                             </div>
                         </div>
                     </div>
-                    `;
+                `;
                 return;
             }
 
+            // --- Teacher Code Entry ---
+            if (state.userType === 'teacher') {
+                app.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center p-4">
+                        <div class="neumorphic-card p-10 max-w-md w-full border-t-indigo-500">
+                            <h2 class="text-3xl font-bold text-center mb-8 text-indigo-700">כניסת מורה</h2>
+                            <input type="password" id="teacherCodeInput" placeholder="הזן קוד מורה" 
+                                class="w-full px-4 py-4 rounded-xl mb-6 text-center text-xl transition neumorphic-input">
+                            <p id="codeError" class="text-red-500 text-center mb-4 hidden">קוד שגוי</p>
+                            <div class="flex gap-4">
+                                <button onclick="handleTeacherLogin()" class="flex-1 btn-indigo neumorphic-btn font-semibold py-4 shadow-lg">
+                                    כניסה
+                                </button>
+                                <button onclick="goHome()" class="flex-1 btn-gray neumorphic-btn font-semibold py-4 shadow-md">
+                                    חזור
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
 
-            // Student Dashboard (Also used for View Mode)
+            // --- Class Selection (Student & Teacher & School Area) ---
+            if (state.userType === 'student' || state.userType === 'teacher-select-class' || state.userType === 'view') {
+                const isTeacher = state.userType.startsWith('teacher');
+                const isStudent = state.userType === 'student';
+                const isView = state.userType === 'view';
+
+                let color = 'indigo';
+                let buttonAction = 'selectClassTeacher';
+                let title = 'בחר כיתה';
+
+                if (isStudent) {
+                    color = 'green';
+                    buttonAction = 'selectClassStudent';
+                } else if (isView) {
+                    color = 'purple';
+                    buttonAction = 'selectClassView'; 
+                    title = 'צפייה במידע כיתתי';
+                }
+
+                const colorClass = isTeacher ? 'border-t-indigo-500' : (isStudent ? 'border-t-green-500' : 'border-t-purple-500');
+
+                app.innerHTML = `
+                    <div class="min-h-screen p-8 flex justify-center items-center">
+                        <div class="max-w-5xl w-full neumorphic-card p-12 ${colorClass}">
+                            <h2 class="text-3xl font-bold text-center mb-10 text-${color}-700">${title}</h2>
+                            <div class="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-6">
+                                ${classes.map(c => `
+                                    <button onclick="${buttonAction}('${c}')" class="btn-${color} neumorphic-btn text-white font-bold text-lg py-6 shadow-lg">
+                                        ${c}
+                                    </button>
+                                `).join('')}
+                            </div>
+                            <button onclick="goHome()" class="mt-10 w-full btn-gray neumorphic-btn font-semibold py-4 shadow-md">
+                                חזור לדף הבית
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // --- Student Name Entry ---
+            if (state.userType === 'student-name-entry') {
+                app.innerHTML = `
+                    <div class="min-h-screen flex items-center justify-center p-4">
+                        <div class="neumorphic-card p-10 max-w-md w-full border-t-green-500">
+                            <h2 class="text-3xl font-bold text-center mb-4 text-green-700">כיתה ${state.selectedClass}</h2>
+                            <p class="text-center text-gray-700 mb-6 text-lg">הזן את שמך (פרטי)</p>
+                            <input type="text" id="studentNameInput" placeholder="שם (פרטי)" 
+                                class="w-full px-4 py-3 rounded-xl mb-6 text-center text-lg transition neumorphic-input">
+                            <p id="studentError" class="text-red-500 text-center mb-4 hidden">שם לא נמצא ברשימה השמית</p>
+                            <div class="flex gap-4">
+                                <button onclick="handleStudentLogin()" class="flex-1 btn-green neumorphic-btn font-semibold py-4 shadow-lg">
+                                    כניסה
+                                </button>
+                                <button onclick="goHome()" class="flex-1 btn-gray neumorphic-btn font-semibold py-4 shadow-md">
+                                    חזור לדף הבית 🏠
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            // --- Student Dashboard (Used also for View Mode) ---
             if (state.userType === 'student-dashboard' || state.userType === 'view-dashboard') {
                 const currentData = getCurrentClassData();
                 const isStudent = state.userType === 'student-dashboard';
                 const color = isStudent ? 'green' : 'purple';
-                const title = isStudent ? `כיתה ${state.selectedClass}` : `מידע כיתתי - ${state.selectedClass}`;
-                const subtitle = isStudent ? `שלום, ${state.studentName}` : 'צפייה כללית';
+                const title = isStudent ? `ברוך הבא לכיתה ${state.selectedClass}` : `מידע כיתתי - ${state.selectedClass}`;
+                const subtitle = isStudent ? `שלום, ${state.studentName}` : 'צפייה כללית ללא כניסת משתמש';
+                const colorClass = isStudent ? 'border-b-green-500' : 'border-b-purple-500';
 
                 app.innerHTML = `
-                    <div class="min-h-screen p-4">
-                        <div class="max-w-6xl mx-auto">
-                            <div class="bg-white rounded-2xl shadow-2xl p-6 mb-4">
-                                <div class="flex justify-between items-center">
+                    <div class="min-h-screen p-8">
+                        <div class="max-w-7xl mx-auto">
+                            <div class="neumorphic-card p-6 mb-8 border-b-6 ${colorClass}">
+                                <div class="flex justify-between items-center flex-wrap">
                                     <div>
-                                        <h2 class="text-2xl font-bold text-${color}-600">${title}</h2>
-                                        <p class="text-gray-600">${subtitle}</p>
+                                        <h2 class="text-3xl font-bold text-${color}-700">${title}</h2>
+                                        <p class="text-lg text-gray-700 mt-1">${subtitle}</p>
                                     </div>
-                                    <button onclick="${isStudent ? 'backToStudentSelect()' : 'backToViewSelect()'}" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
-                                        חזור לבחירת כיתה
+                                    <button onclick="${isStudent ? 'goHome()' : 'backToViewSelect()'}" class="btn-red neumorphic-btn px-6 py-3 font-semibold mt-3 md:mt-0 shadow-lg">
+                                        ${isStudent ? '🏠 חזור לדף הבית' : '🔙 חזור לבחירת כיתה'}
                                     </button>
                                 </div>
                             </div>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                                <div class="bg-white rounded-xl shadow-lg p-6">
-                                    <h3 class="text-xl font-bold mb-4 text-${color}-600">📅 מערכת שעות</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                <div class="neumorphic-card p-6 hover:shadow-2xl transition duration-300 border-t-${color}-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-${color}-700 flex items-center">📅 מערכת שעות</h3>
                                     ${currentData.scheduleImage ? 
-                                        `<img src="${currentData.scheduleImage}" alt="מערכת שעות" class="w-full rounded-lg border-2 border-gray-300">` :
-                                        `<p class="text-gray-500 text-center py-8">אין מערכת שעות</p>`
+                                        `<img src="${currentData.scheduleImage}" alt="מערכת שעות" class="w-full rounded-xl border-2 border-gray-300 cursor-pointer hover:border-${color}-500 transition shadow-inner" onclick="openImageModal('${currentData.scheduleImage}')">` :
+                                        `<div class="text-gray-500 text-center py-10 rounded-xl neumorphic-input"><p>המורה עדיין לא העלה מערכת שעות</p></div>`
                                     }
                                 </div>
                                 
-                                <div class="bg-white rounded-xl shadow-lg p-6">
-                                    <h3 class="text-xl font-bold mb-4 text-${color}-600">📝 תזכורות</h3>
-                                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                                <div class="neumorphic-card p-6 hover:shadow-2xl transition duration-300 border-t-orange-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-orange-700 flex items-center">📝 תזכורות חשובות</h3>
+                                    <div class="space-y-3 max-h-80 overflow-y-auto custom-scroll p-1 -m-1">
                                         ${currentData.reminders.length > 0 ? 
-                                            currentData.reminders.map(r => `<div class="bg-yellow-50 p-3 rounded-lg">${r}</div>`).join('') :
-                                            `<p class="text-gray-500 text-center py-8">אין תזכורות</p>`
+                                            currentData.reminders.map(r => `<div class="bg-yellow-100 p-3 rounded-xl shadow-md border-r-6 border-yellow-500 text-orange-900">${r}</div>`).join('') :
+                                            `<p class="text-gray-500 text-center py-10">אין תזכורות חדשות</p>`
                                         }
                                     </div>
                                 </div>
                                 
-                                <div class="bg-white rounded-xl shadow-lg p-6">
-                                    <h3 class="text-xl font-bold mb-4 text-${color}-600">📄 קבצים</h3>
-                                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                                <div class="neumorphic-card p-6 hover:shadow-2xl transition duration-300 border-t-blue-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-blue-700 flex items-center">📄 קבצים וחומר לימודי</h3>
+                                    <div class="space-y-3 max-h-80 overflow-y-auto custom-scroll p-1 -m-1">
                                         ${currentData.files.length > 0 ? 
                                             currentData.files.map(f => `
-                                                <div class="bg-blue-50 p-3 rounded-lg">
-                                                    <p class="font-semibold">${f.name}</p>
-                                                    <p class="text-sm text-gray-600">${f.date}</p>
+                                                <div class="bg-blue-100 p-3 rounded-xl shadow-md flex justify-between items-center border-r-6 border-blue-500">
+                                                    <div>
+                                                        <p class="font-semibold text-blue-800">${f.name}</p>
+                                                        <p class="text-sm text-gray-600">${f.date}</p>
+                                                    </div>
+                                                    <a href="#" class="btn-indigo text-white text-sm px-4 py-2 rounded-xl transition shadow-md neumorphic-btn">
+                                                        הורד 📥
+                                                    </a>
                                                 </div>
                                             `).join('') :
-                                            `<p class="text-gray-500 text-center py-8">אין קבצים</p>`
+                                            `<p class="text-gray-500 text-center py-10">אין קבצים זמינים</p>`
                                         }
                                     </div>
                                 </div>
@@ -337,130 +608,130 @@
             }
 
 
-            // Teacher Dashboard
+            // --- Teacher Dashboard ---
             if (state.userType === 'teacher-dashboard' && state.selectedClass) {
                 const currentData = getCurrentClassData();
                 app.innerHTML = `
-                    <div class="min-h-screen p-4">
-                        <div class="max-w-6xl mx-auto">
-                            <div class="bg-white rounded-2xl shadow-2xl p-6 mb-4">
-                                <div class="flex justify-between items-center">
-                                    <h2 class="text-2xl font-bold text-indigo-600">כיתה ${state.selectedClass}</h2>
-                                    <button onclick="backToTeacherSelect()" class="bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
-                                        חזור לבחירת כיתה
+                    <div class="min-h-screen p-8">
+                        <div class="max-w-7xl mx-auto">
+                            <div class="neumorphic-card p-6 mb-8 border-b-6 border-indigo-500">
+                                <div class="flex justify-between items-center flex-wrap">
+                                    <h2 class="text-3xl font-bold text-indigo-700">לוח מחוונים - כיתה ${state.selectedClass}</h2>
+                                    <button onclick="goHome()" class="btn-red neumorphic-btn px-6 py-3 font-semibold mt-3 md:mt-0 shadow-lg">
+                                        🏠 חזור לדף הבית
                                     </button>
                                 </div>
                             </div>
                             
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="bg-white rounded-xl shadow-lg p-6">
-                                    <h3 class="text-xl font-bold mb-4 text-indigo-600">📅 מערכת שעות</h3>
-                                    <div class="space-y-3">
+                            <div class="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-2 gap-8">
+                                <div class="neumorphic-card p-6 border-t-indigo-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-indigo-700">📅 מערכת שעות</h3>
+                                    <div class="space-y-4">
                                         <label class="block">
-                                            <span class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer inline-flex items-center gap-2">
-                                                📤 העלה תמונה
+                                            <span class="btn-indigo neumorphic-btn text-white px-6 py-3 rounded-xl cursor-pointer inline-flex items-center gap-2 transition shadow-lg">
+                                                📤 העלה תמונה חדשה
                                             </span>
                                             <input type="file" accept="image/*" onchange="handleScheduleUpload(event)" class="hidden">
                                         </label>
                                         ${currentData.scheduleImage ? `
-                                            <div class="space-y-2">
-                                                <img src="${currentData.scheduleImage}" alt="מערכת שעות" class="w-full rounded-lg border-2 border-gray-300">
-                                                <button onclick="deleteSchedule()" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg w-full">
-                                                    🗑️ מחק תמונה
+                                            <div class="space-y-3 p-4 border border-gray-300 rounded-xl bg-gray-50 neumorphic-card shadow-inner">
+                                                <img src="${currentData.scheduleImage}" alt="מערכת שעות" class="w-full rounded-lg border-2 border-indigo-300 cursor-pointer shadow-md" onclick="openImageModal('${currentData.scheduleImage}')">
+                                                <button onclick="deleteSchedule()" class="btn-red neumorphic-btn text-white px-4 py-2 rounded-xl w-full transition shadow-lg">
+                                                    🗑️ מחק תמונה נוכחית
                                                 </button>
                                             </div>
                                         ` : ''}
                                     </div>
                                 </div>
                                 
-                                <div class="bg-white rounded-xl shadow-lg p-6">
-                                    <h3 class="text-xl font-bold mb-4 text-indigo-600">📝 תזכורות</h3>
+                                <div class="neumorphic-card p-6 border-t-orange-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-orange-700">📝 ניהול תזכורות</h3>
                                     ${!state.showReminderInput ? `
-                                        <button onclick="showReminderForm()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg mb-4 w-full">
-                                            הוסף תזכורת
+                                        <button onclick="showReminderForm()" class="btn-green neumorphic-btn text-white px-4 py-2 rounded-xl mb-4 w-full transition shadow-lg">
+                                            ➕ הוסף תזכורת
                                         </button>
                                     ` : `
-                                        <div class="mb-4 space-y-2">
+                                        <div class="mb-4 space-y-3 p-4 border border-gray-300 rounded-xl bg-gray-50 neumorphic-card shadow-inner">
                                             <input type="text" id="reminderInput" placeholder="הזן תזכורת..." 
-                                                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg"
+                                                class="w-full px-4 py-3 rounded-xl transition neumorphic-input"
                                                 onkeypress="if(event.key==='Enter') addReminder()">
                                             <div class="flex gap-2">
-                                                <button onclick="addReminder()" class="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                                                <button onclick="addReminder()" class="flex-1 btn-green neumorphic-btn shadow-lg">
                                                     שמור
                                                 </button>
-                                                <button onclick="cancelReminder()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
+                                                <button onclick="cancelReminder()" class="flex-1 btn-gray neumorphic-btn shadow-md">
                                                     ביטול
                                                 </button>
                                             </div>
                                         </div>
                                     `}
-                                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                                    <div class="space-y-3 max-h-64 overflow-y-auto custom-scroll p-1 -m-1">
                                         ${currentData.reminders.map((r, i) => `
-                                            <div class="bg-yellow-50 p-3 rounded-lg flex justify-between items-center">
-                                                <span>${r}</span>
-                                                <button onclick="deleteReminder(${i})" class="text-red-500 hover:text-red-700">❌</button>
+                                            <div class="bg-yellow-100 p-3 rounded-xl flex justify-between items-center border-r-6 border-yellow-500 shadow-md">
+                                                <span class="text-orange-900">${r}</span>
+                                                <button onclick="deleteReminder(${i})" class="btn-gray text-red-600 p-1.5 transition neumorphic-btn shadow-sm rounded-full">❌</button>
                                             </div>
                                         `).join('')}
                                     </div>
                                 </div>
                                 
-                                <div class="bg-white rounded-xl shadow-lg p-6">
-                                    <h3 class="text-xl font-bold mb-4 text-indigo-600">📄 קבצים</h3>
+                                <div class="neumorphic-card p-6 border-t-blue-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-blue-700">📄 ניהול קבצים</h3>
                                     <label class="block mb-4">
-                                        <span class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg cursor-pointer inline-flex items-center gap-2">
-                                            📤 העלה קובץ
+                                        <span class="btn-indigo neumorphic-btn text-white px-6 py-3 rounded-xl cursor-pointer inline-flex items-center gap-2 transition shadow-lg">
+                                            📤 העלה קובץ חדש
                                         </span>
                                         <input type="file" onchange="handleFileUpload(event)" class="hidden">
                                     </label>
-                                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                                    <div class="space-y-3 max-h-64 overflow-y-auto custom-scroll p-1 -m-1">
                                         ${currentData.files.map((f, i) => `
-                                            <div class="bg-blue-50 p-3 rounded-lg flex justify-between items-center">
+                                            <div class="bg-blue-100 p-3 rounded-xl flex justify-between items-center border-r-6 border-blue-500 shadow-md">
                                                 <div>
-                                                    <p class="font-semibold">${f.name}</p>
+                                                    <p class="font-semibold text-blue-800">${f.name}</p>
                                                     <p class="text-sm text-gray-600">${f.date}</p>
                                                 </div>
-                                                <button onclick="deleteFile(${i})" class="text-red-500 hover:text-red-700">❌</button>
+                                                <button onclick="deleteFile(${i})" class="btn-gray text-red-600 p-1.5 transition neumorphic-btn shadow-sm rounded-full">❌</button>
                                             </div>
                                         `).join('')}
                                     </div>
                                 </div>
                                 
-                                <div class="bg-white rounded-xl shadow-lg p-6">
-                                    <h3 class="text-xl font-bold mb-4 text-indigo-600">👥 רשימה שמית</h3>
+                                <div class="neumorphic-card p-6 border-t-purple-500">
+                                    <h3 class="text-2xl font-bold mb-4 text-purple-700">👥 ניהול רשימה שמית</h3>
                                     ${!state.showStudentInput ? `
-                                        <button onclick="showStudentForm()" class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg mb-4 w-full">
-                                            הוסף תלמיד
+                                        <button onclick="showStudentForm()" class="btn-green neumorphic-btn text-white px-4 py-2 rounded-xl mb-4 w-full transition shadow-lg">
+                                            ➕ הוסף תלמיד
                                         </button>
                                     ` : `
-                                        <div class="mb-4 space-y-2">
+                                        <div class="mb-4 space-y-3 p-4 border border-gray-300 rounded-xl bg-gray-50 neumorphic-card shadow-inner">
                                             <input type="text" id="studentNumber" placeholder="מספר תלמיד" 
-                                                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg">
+                                                class="w-full px-4 py-3 rounded-xl transition neumorphic-input">
                                             <input type="text" id="studentName" placeholder="שם תלמיד" 
-                                                class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg">
-                                            <select id="studentGender" class="w-full px-4 py-2 border-2 border-gray-300 rounded-lg">
+                                                class="w-full px-4 py-3 rounded-xl transition neumorphic-input">
+                                            <select id="studentGender" class="w-full px-4 py-3 rounded-xl transition neumorphic-input">
                                                 <option value="">בחר מין</option>
-                                                <option value="בן">בן</option>
-                                                <option value="בת">בת</option>
+                                                <option value="זכר">זכר</option>
+                                                <option value="נקבה">נקבה</option>
                                             </select>
-                                            <div class="flex gap-2">
-                                                <button onclick="addStudent()" class="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg">
+                                            <div class="flex gap-2 mt-2">
+                                                <button onclick="addStudent()" class="flex-1 btn-green neumorphic-btn font-semibold py-3 shadow-lg">
                                                     שמור
                                                 </button>
-                                                <button onclick="cancelStudent()" class="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-700 px-4 py-2 rounded-lg">
+                                                <button onclick="cancelStudent()" class="flex-1 btn-gray neumorphic-btn font-semibold py-3 shadow-md">
                                                     ביטול
                                                 </button>
                                             </div>
                                         </div>
                                     `}
-                                    <div class="space-y-2 max-h-64 overflow-y-auto">
+                                    <div class="space-y-3 max-h-64 overflow-y-auto custom-scroll p-1 -m-1">
                                         ${currentData.students.map((s, i) => `
-                                            <div class="bg-purple-50 p-3 rounded-lg flex justify-between items-center">
+                                            <div class="bg-purple-100 p-3 rounded-xl flex justify-between items-center border-r-6 border-purple-500 shadow-md">
                                                 <div>
-                                                    <span class="font-semibold">${s.number}. </span>
+                                                    <span class="font-semibold text-purple-800">${s.number}. </span>
                                                     <span>${s.name} </span>
-                                                    <span class="text-gray-600">(${s.gender})</span>
+                                                    <span class="text-sm text-gray-600">(${s.gender})</span>
                                                 </div>
-                                                <button onclick="deleteStudent(${i})" class="text-red-500 hover:text-red-700">❌</button>
+                                                <button onclick="deleteStudent(${i})" class="btn-gray text-red-600 p-1.5 transition neumorphic-btn shadow-sm rounded-full">❌</button>
                                             </div>
                                         `).join('')}
                                     </div>
@@ -475,9 +746,10 @@
             // Placeholder for other types
             app.innerHTML = `
                 <div class="min-h-screen flex items-center justify-center p-4">
-                    <div class="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full text-center">
-                        <h2 class="text-2xl font-bold mb-4 text-indigo-600">אזור זה בבנייה</h2>
-                        <button onclick="goHome()" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-3 rounded-lg">
+                    <div class="neumorphic-card p-10 max-w-md w-full border-t-indigo-500">
+                        <h2 class="text-3xl font-bold mb-4 text-indigo-700">אזור זה בבנייה</h2>
+                        <p class="mb-6 text-gray-700">אנו עובדים קשה כדי להביא לכם את הפיצ'רים הנוספים!</p>
+                        <button onclick="goHome()" class="btn-indigo neumorphic-btn px-6 py-3 font-semibold shadow-lg">
                             חזור לדף הבית
                         </button>
                     </div>
@@ -485,7 +757,139 @@
             `;
         }
 
-        // Event handlers
+        // =========================================================
+        // === AUXILIARY AND EVENT HANDLERS (Calling saveAndRender) ===
+        // =========================================================
+
+        function showDeleteModal(index) {
+            state.activityToDeleteIndex = index; 
+            const modal = document.getElementById('deleteModal');
+            document.getElementById('deleteCodeInput').value = '';
+            document.getElementById('deleteCodeError').classList.add('hidden');
+            modal.classList.remove('hidden', 'opacity-0');
+            modal.classList.add('flex', 'opacity-100');
+        }
+
+        function closeDeleteModal() {
+            state.activityToDeleteIndex = null; 
+            const modal = document.getElementById('deleteModal');
+            modal.classList.remove('flex', 'opacity-100');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function verifyAndDeleteActivity() {
+            const code = document.getElementById('deleteCodeInput').value;
+            if (code.toUpperCase() === 'MORE') {
+                const index = state.activityToDeleteIndex;
+                if (index !== null) {
+                    state.activities.splice(index, 1);
+                    closeDeleteModal();
+                    saveAndRender(); // שינוי: קורא ל-saveAndRender
+                }
+            } else {
+                document.getElementById('deleteCodeError').classList.remove('hidden');
+            }
+        }
+
+        function deleteActivity(index) {
+            showDeleteModal(index);
+        }
+
+        // --- Activity Publishing Functions ---
+        
+        function setPublishingMode(mode) {
+            state.publishingMode = mode;
+            render();
+        }
+
+        function showPublishModal() {
+            const modal = document.getElementById('publishModal');
+            document.getElementById('publishCodeInput').value = '';
+            document.getElementById('publishCodeError').classList.add('hidden');
+            modal.classList.remove('hidden', 'opacity-0');
+            modal.classList.add('flex', 'opacity-100');
+        }
+
+        function closePublishModal() {
+            const modal = document.getElementById('publishModal');
+            modal.classList.remove('flex', 'opacity-100');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function verifyAndShowPublishForm() {
+            const code = document.getElementById('publishCodeInput').value;
+            if (code.toUpperCase() === 'MORE') {
+                closePublishModal();
+                state.showActivityPublishForm = true;
+                setPublishingMode('file'); 
+                render();
+            } else {
+                document.getElementById('publishCodeError').classList.remove('hidden');
+            }
+        }
+
+        function cancelPublishForm() {
+            state.showActivityPublishForm = false;
+            render();
+        }
+
+        function publishActivity() {
+            const description = document.getElementById('activityDescriptionInput').value.trim();
+            const date = new Date().toLocaleDateString('he-IL');
+            
+            if (!description) {
+                alert('יש להזין תיאור או מלל לפעילות.');
+                return;
+            }
+
+            if (state.publishingMode === 'link') {
+                const url = document.getElementById('activityLinkInput').value.trim();
+                if (!url || !url.startsWith('http')) {
+                    alert('יש להזין קישור תקין (כולל http:// או https://).');
+                    return;
+                }
+                state.activities.push({
+                    type: 'link',
+                    url: url,
+                    description: description,
+                    date: date
+                });
+                state.showActivityPublishForm = false;
+                saveAndRender(); // שינוי: קורא ל-saveAndRender
+
+            } else if (state.publishingMode === 'file') {
+                const fileInput = document.getElementById('activityFileInput');
+                const file = fileInput.files[0];
+
+                if (!file) {
+                    alert('יש לבחור קובץ להעלאה.');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    state.activities.push({
+                        type: 'file',
+                        url: e.target.result, 
+                        name: file.name,
+                        description: description,
+                        date: date
+                    });
+                    state.showActivityPublishForm = false;
+                    saveAndRender(); // שינוי: קורא ל-saveAndRender
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        // --- Other General Functions ---
+        
         function selectUserType(type) {
             state.userType = type;
             render();
@@ -495,6 +899,8 @@
             state.userType = null;
             state.selectedClass = null;
             state.studentName = '';
+            state.showActivityPublishForm = false; 
+            state.activityToDeleteIndex = null; 
             render();
         }
 
@@ -549,20 +955,20 @@
             }
             render();
         }
-
+        
         function backToViewSelect() {
             state.userType = 'view';
             state.selectedClass = null;
             render();
         }
 
-
         function handleStudentLogin() {
             const name = document.getElementById('studentNameInput').value;
             const currentData = getCurrentClassData();
-            const studentExists = currentData.students.some(s => s.name === name);
+            // Allow 'admin' for easy testing, or match against registered student names
+            const studentExists = name.toLowerCase() === 'admin' || currentData.students.some(s => s.name === name);
             
-            if (name.toLowerCase() === 'admin' || studentExists) {
+            if (studentExists) {
                 state.studentName = name;
                 state.userType = 'student-dashboard';
                 render();
@@ -571,32 +977,20 @@
             }
         }
 
-        function backToStudentSelect() {
-            state.userType = 'student';
-            state.selectedClass = null;
-            state.studentName = '';
-            render();
-        }
-
-        function backToTeacherSelect() {
-            state.userType = 'teacher-select-class';
-            state.selectedClass = null;
-            render();
-        }
-
+        // Functions using updateClassData already call saveAndRender internally.
         function handleScheduleUpload(event) {
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    updateClassData('scheduleImage', e.target.result);
+                    updateClassData('scheduleImage', e.target.result); // קורא ל-saveAndRender
                 };
                 reader.readAsDataURL(file);
             }
         }
 
         function deleteSchedule() {
-            updateClassData('scheduleImage', null);
+            updateClassData('scheduleImage', null); // קורא ל-saveAndRender
         }
 
         function showReminderForm() {
@@ -608,7 +1002,7 @@
             const input = document.getElementById('reminderInput');
             if (input && input.value.trim()) {
                 const currentData = getCurrentClassData();
-                updateClassData('reminders', [...currentData.reminders, input.value]);
+                updateClassData('reminders', [...currentData.reminders, input.value]); // קורא ל-saveAndRender
                 state.showReminderInput = false;
             }
         }
@@ -621,7 +1015,7 @@
         function deleteReminder(index) {
             const currentData = getCurrentClassData();
             const newReminders = currentData.reminders.filter((_, i) => i !== index);
-            updateClassData('reminders', newReminders);
+            updateClassData('reminders', newReminders); // קורא ל-saveAndRender
         }
 
         function handleFileUpload(event) {
@@ -631,14 +1025,14 @@
                 updateClassData('files', [...currentData.files, { 
                     name: file.name, 
                     date: new Date().toLocaleDateString('he-IL') 
-                }]);
+                }]); // קורא ל-saveAndRender
             }
         }
 
         function deleteFile(index) {
             const currentData = getCurrentClassData();
             const newFiles = currentData.files.filter((_, i) => i !== index);
-            updateClassData('files', newFiles);
+            updateClassData('files', newFiles); // קורא ל-saveAndRender
         }
 
         function showStudentForm() {
@@ -653,7 +1047,7 @@
             
             if (number && name && gender) {
                 const currentData = getCurrentClassData();
-                updateClassData('students', [...currentData.students, { number, name, gender }]);
+                updateClassData('students', [...currentData.students, { number, name, gender }]); // קורא ל-saveAndRender
                 state.showStudentInput = false;
             }
         }
@@ -666,24 +1060,30 @@
         function deleteStudent(index) {
             const currentData = getCurrentClassData();
             const newStudents = currentData.students.filter((_, i) => i !== index);
-            updateClassData('students', newStudents);
+            updateClassData('students', newStudents); // קורא ל-saveAndRender
         }
         
-        // --- Activity Functions (Placeholder - need to define showPublishModal, deleteActivity, etc. if you want them to work) ---
-        function showPublishModal() {
-            alert("פונקציית פרסום פעילות דורשת מימוש של חלון מודאלי.");
+        // =========================================================
+        // === INITIALIZATION                                    ===
+        // =========================================================
+        
+        /**
+         * פונקציה ראשית לאתחול האפליקציה וטעינת הנתונים השמורים.
+         */
+        async function initializeApp() {
+            const loadedData = await loadStateFromDatabase(); // טוען את הנתונים השמורים
+            
+            if (loadedData) {
+                // מעדכן את הסטייט עם הנתונים שנטענו
+                state.classData = loadedData.classData || {};
+                state.activities = loadedData.activities || [];
+            }
+            
+            render(); // מציג את הממשק עם הנתונים המעודכנים (או הדיפולטיביים)
         }
-        function deleteActivity(index) {
-             state.activities.splice(index, 1);
-             saveState(); 
-             render();
-        }
-        // --- End Activity Functions ---
 
-
-        // Initial load and render
-        loadState();
-        render();
+        // Initial render replaced with initialization function
+        initializeApp();
     </script>
 </body>
 </html>
